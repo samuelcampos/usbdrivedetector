@@ -1,10 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-package net.samuelcampos.usbdrivedectector.devicesmanager;
+package net.samuelcampos.usbdrivedectector.detectors;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,17 +15,16 @@ import org.apache.log4j.Logger;
  *
  * @author samuelcampos
  */
-public class OSXRemovableDevicesManager extends StorageDevicesManager {
+public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
     
     private static final Logger logger = Logger
-			.getLogger(OSXRemovableDevicesManager.class);
+			.getLogger(OSXStorageDeviceDetector.class);
 
     private static final String osXDetectUSBCommand = "system_profiler SPUSBDataType";
     private static final Pattern macOSXPattern = Pattern.compile("^.+Mount Point: (.+)$");
     
-    public OSXRemovableDevicesManager() {
-        super();
-        
+    public OSXStorageDeviceDetector() {
+        super();   
     }
 
     @Override

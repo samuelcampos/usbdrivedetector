@@ -22,4 +22,9 @@ public class USBStorageEvent {
     public DeviceEventType getEventType() {
         return eventType;
     }
+
+    @Override
+    public String toString() {
+        return "USBStorageEvent{" + "storageDevice=" + storageDevice + ", eventType=" + eventType + '}';
+    }
 }

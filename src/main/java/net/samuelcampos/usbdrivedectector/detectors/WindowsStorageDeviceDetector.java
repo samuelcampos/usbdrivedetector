@@ -1,4 +1,4 @@
-package net.samuelcampos.usbdrivedectector.devicesmanager;
+package net.samuelcampos.usbdrivedectector.detectors;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,17 +13,17 @@ import org.apache.log4j.Logger;
  *
  * @author samuelcampos
  */
-public class WindowsDevicesManager extends StorageDevicesManager {
+public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector {
 
     private static final Logger logger = Logger
-            .getLogger(WindowsDevicesManager.class);
+            .getLogger(WindowsStorageDeviceDetector.class);
 
     /**
      * wmic logicaldisk where drivetype=2 get description,deviceid,volumename
      */
     private static final String windowsDetectUSBCommand = "wmic logicaldisk where drivetype=2 get deviceid";
 
-    public WindowsDevicesManager() {
+    public WindowsStorageDeviceDetector() {
 
     }
 

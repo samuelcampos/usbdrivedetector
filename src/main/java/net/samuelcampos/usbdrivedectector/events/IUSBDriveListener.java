@@ -6,7 +6,5 @@ package net.samuelcampos.usbdrivedectector.events;
  */
 public interface IUSBDriveListener {
     
-    public void usbDriveConnected(USBStorageEvent ev);
-    
-    public void usbDriveRemoved(USBStorageEvent ev);
+    public void usbDriveEvent(USBStorageEvent event);
 }

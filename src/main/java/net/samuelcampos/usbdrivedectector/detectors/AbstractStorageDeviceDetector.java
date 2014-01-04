@@ -1,4 +1,4 @@
-package net.samuelcampos.usbdrivedectector.devicesmanager;
+package net.samuelcampos.usbdrivedectector.detectors;
 
 import java.util.List;
 import javax.swing.filechooser.FileSystemView;
@@ -8,13 +8,12 @@ import net.samuelcampos.usbdrivedectector.USBStorageDevice;
  * This class is prepared to:
  * <ul>
  * <li>Windows (XP or newer)</li>
- * <li>Linux</li>
- * <li>Mac OS X</li>
+ * <li>Mac OS X (10.7 or newer)</li>
  * </ul>
  *
  * @author samuelcampos
  */
-public abstract class StorageDevicesManager {
+public abstract class AbstractStorageDeviceDetector {
 
     protected final FileSystemView fsView;
 
@@ -25,35 +24,39 @@ public abstract class StorageDevicesManager {
     // private static final String OSArch = System.getProperty("os.arch");
 
     /**
-     * {@link StorageDevicesManager} instance. <br/>
+     * {@link AbstractStorageDeviceDetector} instance. <br/>
      * This instance is created (Thread-Safe) when the JVM loads the class.
      */
-    private static final StorageDevicesManager instance;
+    private static final AbstractStorageDeviceDetector instance;
 
     static {
         if (OSName.startsWith("win")) {
-            instance = new WindowsDevicesManager();
+            instance = new WindowsStorageDeviceDetector();
         } else if (OSName.startsWith("linux")) {
             instance = null;
         } else if (OSName.startsWith("mac")) {
-            instance = new OSXRemovableDevicesManager();
+            instance = new OSXStorageDeviceDetector();
         }
         else {
             instance = null;
         }
     }
     
-    public static StorageDevicesManager getInstance () {
+    public static AbstractStorageDeviceDetector getInstance () {
+        if(instance == null)
+            throw new UnsupportedOperationException("Your Operative System (" + OSName +") is not supported!");
+        
         return instance;
     }
 
-    public StorageDevicesManager() {
+    public AbstractStorageDeviceDetector() {
         fsView = FileSystemView.getFileSystemView();
     }
 
     /**
+     * Returns the storage devices connected to the computer.
      * 
-     * @return the list of the 
+     * @return the list of the USB storage devices
      */
     public abstract List<USBStorageDevice> getRemovableDevices();
 }

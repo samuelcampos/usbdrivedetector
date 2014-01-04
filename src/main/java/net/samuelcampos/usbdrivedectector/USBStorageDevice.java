@@ -31,7 +31,8 @@ public class USBStorageDevice {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 97 * hash + (this.rootDirectory != null ? this.rootDirectory.hashCode() : 0);
+        hash = 89 * hash + (this.rootDirectory != null ? this.rootDirectory.hashCode() : 0);
+        hash = 89 * hash + (this.deviceName != null ? this.deviceName.hashCode() : 0);
         return hash;
     }
 
@@ -49,6 +50,8 @@ public class USBStorageDevice {
         }
         return true;
     }
+
+    
 
 	@Override
 	public String toString() {
