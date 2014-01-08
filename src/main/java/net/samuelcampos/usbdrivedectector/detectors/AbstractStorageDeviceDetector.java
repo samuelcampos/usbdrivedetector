@@ -33,7 +33,7 @@ public abstract class AbstractStorageDeviceDetector {
         if (OSName.startsWith("win")) {
             instance = new WindowsStorageDeviceDetector();
         } else if (OSName.startsWith("linux")) {
-            instance = null;
+            instance = new LinuxStorageDeviceDetector();
         } else if (OSName.startsWith("mac")) {
             instance = new OSXStorageDeviceDetector();
         }
