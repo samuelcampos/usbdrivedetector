@@ -49,6 +49,10 @@ public class USBDeviceDetectorManager {
     public synchronized boolean removeDriveListener(IUSBDriveListener listener) {
         return listeners.remove(listener);
     }
+    
+    public List<USBStorageDevice> getRemovableDevices() {
+        return AbstractStorageDeviceDetector.getInstance().getRemovableDevices();
+    }
 
     private void updateState(List<USBStorageDevice> actualConnectedDevices) {
         USBStorageEvent event;

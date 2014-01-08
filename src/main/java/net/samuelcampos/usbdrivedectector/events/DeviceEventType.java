@@ -1,7 +1,7 @@
 package net.samuelcampos.usbdrivedectector.events;
 
 /**
- * Type of events that occured to USB Storage devices
+ * Type of events that occur to USB Storage devices
  *
  * @author samuelcampos
  */

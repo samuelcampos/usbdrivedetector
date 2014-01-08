@@ -3,7 +3,7 @@ package net.samuelcampos.usbdrivedectector;
 import java.io.File;
 
 /**
- * This class represents a USB Storage Device on the computer
+ * Class to represent a USB Storage Device connected on the computer
  * 
  * @author samuelcampos
  */
@@ -24,6 +24,10 @@ public class USBStorageDevice {
 		return rootDirectory;
 	}
 
+    /**
+     * 
+     * @return the name of the USB storage device
+     */
 	public String getDeviceName() {
 		return deviceName;
 	}
@@ -45,10 +49,7 @@ public class USBStorageDevice {
             return false;
         }
         final USBStorageDevice other = (USBStorageDevice) obj;
-        if (this.rootDirectory != other.rootDirectory && (this.rootDirectory == null || !this.rootDirectory.equals(other.rootDirectory))) {
-            return false;
-        }
-        return true;
+        return this.rootDirectory == other.rootDirectory || (this.rootDirectory != null && this.rootDirectory.equals(other.rootDirectory));
     }
 
     
