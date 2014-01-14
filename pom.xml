@@ -1,13 +1,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
 
     <groupId>net.samuelcampos</groupId>
     <artifactId>usbdrivedectector</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>USB Drive Dectector</name>
+    <description>A Java library to get a list of all usb storage devices connected to the computer. It works on the three main operative systems (Windows, Linux and OS X).</description>
     <url>http://www.samuelcampos.net</url>
     
     <licenses>
@@ -19,9 +26,18 @@
     </licenses>
     
     <scm>
-        <url>https://github.com/samuelcampos/usbdrivedetector</url>
-        <connection>scm:git:https://github.com/samuelcampos/usbdrivedetector.git</connection>
+        <connection>scm:git:git@github.com:samuelcampos/usbdrivedetector.git</connection>
+        <developerConnection>scm:git:git@github.com:samuelcampos/usbdrivedetector.git</developerConnection>
+        <url>git@github.com:samuelcampos/usbdrivedetector.git</url>
     </scm>
+    
+    <developers>
+        <developer>
+            <id>samuelcampos.net</id>
+            <name>Samuel Campos</name>
+            <email></email>
+        </developer>
+    </developers>
     
     <build>
         <plugins>
