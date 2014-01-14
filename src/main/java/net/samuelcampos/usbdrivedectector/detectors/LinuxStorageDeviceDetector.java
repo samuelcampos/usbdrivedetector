@@ -1,14 +1,27 @@
+/*
+ * Copyright 2014 samuelcampos.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package net.samuelcampos.usbdrivedectector.detectors;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.samuelcampos.usbdrivedectector.USBStorageDevice;
+import net.samuelcampos.usbdrivedectector.process.CommandLineExecutor;
 import org.apache.log4j.Logger;
 
 /**
@@ -26,44 +39,34 @@ public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
     private static final String linuxDetectUSBCommand2 = "udevadm info -q property -n ";
     private static final String strDeviceVerifier = "ID_USB_DRIVER=usb-storage";
 
+    private final CommandLineExecutor commandExecutor1, commandExecutor2;
+
     public LinuxStorageDeviceDetector() {
         super();
+
+        commandExecutor1 = new CommandLineExecutor();
+        commandExecutor2 = new CommandLineExecutor();
     }
 
     private boolean isUSBStorage(String device) {
         String verifyCommand = linuxDetectUSBCommand2 + device;
-        
-        if (logger.isTraceEnabled()) {
-            logger.trace("Running command: " + verifyCommand);
-        }
-
-        BufferedReader in = null;
-        Process process = null;
 
         try {
-            process = Runtime.getRuntime().exec(verifyCommand);
+            commandExecutor2.executeCommand(verifyCommand);
 
-            in = new BufferedReader(new InputStreamReader(
-                    process.getInputStream()));
-
-            String line;
-            while ((line = in.readLine()) != null) {
-                if(line.equals(strDeviceVerifier))
+            String outputLine;
+            while ((outputLine = commandExecutor2.readOutputLine()) != null) {
+                if (strDeviceVerifier.equals(outputLine)) {
                     return true;
+                }
             }
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    logger.error(e.getMessage(), e);
-                }
-            }
-
-            if (process != null) {
-                process.destroy();
+            try {
+                commandExecutor2.close();
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
             }
         }
 
@@ -74,38 +77,19 @@ public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
     public List<USBStorageDevice> getRemovableDevices() {
         ArrayList<USBStorageDevice> listDevices = new ArrayList<USBStorageDevice>();
 
-        BufferedReader in = null;
-        Process process = null;
-
         try {
-            if (logger.isTraceEnabled()) {
-                logger.trace("Running command: " + linuxDetectUSBCommand1);
-            }
+            commandExecutor1.executeCommand(linuxDetectUSBCommand1);
 
-            process = Runtime.getRuntime().exec(linuxDetectUSBCommand1);
-
-            in = new BufferedReader(new InputStreamReader(
-                    process.getInputStream()));
-
-            String line;
-            while ((line = in.readLine()) != null) {
-                Matcher matcher = command1Pattern.matcher(line);
+            String outputLine;
+            while ((outputLine = commandExecutor1.readOutputLine()) != null) {
+                Matcher matcher = command1Pattern.matcher(outputLine);
 
                 if (matcher.matches()) {
                     String device = matcher.group(1);
                     String rootPath = matcher.group(2);
 
-                    if(isUSBStorage(device)) {
-                        File root = new File(rootPath);
-
-                         if (logger.isTraceEnabled()) {
-                         logger.trace("Device found: " + root.getPath());
-                         }
-
-
-                         USBStorageDevice usbDevice = new USBStorageDevice(root,
-                         fsView.getSystemDisplayName(root));
-                         listDevices.add(usbDevice);
+                    if (isUSBStorage(device)) {
+                        addUSBDevice(listDevices, rootPath);
                     }
                 }
             }
@@ -113,16 +97,10 @@ public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    logger.error(e.getMessage(), e);
-                }
-            }
-
-            if (process != null) {
-                process.destroy();
+            try {
+                commandExecutor1.close();
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
             }
         }
 

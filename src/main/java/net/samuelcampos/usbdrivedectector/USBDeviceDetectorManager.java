@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014 samuelcampos.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.samuelcampos.usbdrivedectector;
 
 import java.util.ArrayList;
@@ -11,11 +27,15 @@ import net.samuelcampos.usbdrivedectector.detectors.AbstractStorageDeviceDetecto
 import net.samuelcampos.usbdrivedectector.events.DeviceEventType;
 import net.samuelcampos.usbdrivedectector.events.IUSBDriveListener;
 import net.samuelcampos.usbdrivedectector.events.USBStorageEvent;
+import org.apache.log4j.Logger;
 
 /**
  * @author samuelcampos
  */
 public class USBDeviceDetectorManager {
+    
+    private static final Logger logger = Logger
+            .getLogger(USBDeviceDetectorManager.class);
 
     private static final long defaultPoolingInterval = 10 * 1000;
 
@@ -92,6 +112,8 @@ public class USBDeviceDetectorManager {
 
         @Override
         public void run() {
+            logger.trace("Pooling refresh task is running");
+            
             List<USBStorageDevice> actualConnectedDevices = AbstractStorageDeviceDetector.getInstance().getRemovableDevices();
 
             updateState(actualConnectedDevices);
