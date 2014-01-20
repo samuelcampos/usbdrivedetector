@@ -28,7 +28,7 @@
     <scm>
         <connection>scm:git:git@github.com:samuelcampos/usbdrivedetector.git</connection>
         <developerConnection>scm:git:git@github.com:samuelcampos/usbdrivedetector.git</developerConnection>
-        <url>git@github.com:samuelcampos/usbdrivedetector.git</url>
+        <url>http://github.com/samuelcampos/usbdrivedetector/</url>
     </scm>
     
     <developers>
@@ -53,6 +53,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.4</version>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
