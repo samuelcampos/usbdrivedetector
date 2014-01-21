@@ -25,7 +25,7 @@
     </licenses>
     
     <scm>
-        <connection>scm:git:git@github.com:samuelcampos/usbdrivedetector.git</connection>
+        <connection>scm:git:git://github.com/samuelcampos/usbdrivedetector.git</connection>
         <developerConnection>scm:git:git@github.com:samuelcampos/usbdrivedetector.git</developerConnection>
         <url>http://github.com/samuelcampos/usbdrivedetector/</url>
     </scm>
