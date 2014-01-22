@@ -9,7 +9,7 @@
 
     <groupId>net.samuelcampos</groupId>
     <artifactId>usbdrivedectector</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>USB Drive Dectector</name>
@@ -103,7 +103,7 @@
         <repository>
             <id>sonatype-nexus-staging</id>
             <name>Sonatype Nexus release repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
         </repository>
     </distributionManagement>
     
