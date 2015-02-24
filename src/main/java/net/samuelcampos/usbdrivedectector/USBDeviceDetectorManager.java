@@ -112,11 +112,14 @@ public class USBDeviceDetectorManager {
 
         @Override
         public void run() {
-            logger.trace("Pooling refresh task is running");
+            try {
+	        logger.trace("Pooling refresh task is running");
             
-            List<USBStorageDevice> actualConnectedDevices = AbstractStorageDeviceDetector.getInstance().getRemovableDevices();
+                List<USBStorageDevice> actualConnectedDevices = AbstractStorageDeviceDetector.getInstance().getRemovableDevices();
 
-            updateState(actualConnectedDevices);
+                updateState(actualConnectedDevices);
+	    } catch(Exception e) {
+	    }
         }
 
     }
