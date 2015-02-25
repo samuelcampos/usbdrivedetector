@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.samuelcampos.usbdrivedectector;
 
 import java.util.ArrayList;
@@ -33,7 +32,7 @@ import org.apache.log4j.Logger;
  * @author samuelcampos
  */
 public class USBDeviceDetectorManager {
-    
+
     private static final Logger logger = Logger
             .getLogger(USBDeviceDetectorManager.class);
 
@@ -69,7 +68,7 @@ public class USBDeviceDetectorManager {
     public synchronized boolean removeDriveListener(IUSBDriveListener listener) {
         return listeners.remove(listener);
     }
-    
+
     public List<USBStorageDevice> getRemovableDevices() {
         return AbstractStorageDeviceDetector.getInstance().getRemovableDevices();
     }
@@ -77,7 +76,7 @@ public class USBDeviceDetectorManager {
     private void updateState(List<USBStorageDevice> actualConnectedDevices) {
         USBStorageEvent event;
 
-        synchronized(this) {
+        synchronized (this) {
             Iterator<USBStorageDevice> itConnectedDevices = connectedDevices.iterator();
 
             while (itConnectedDevices.hasNext()) {
@@ -93,10 +92,10 @@ public class USBDeviceDetectorManager {
                 }
             }
 
-            connectedDevices.addAll(actualConnectedDevices);        
+            connectedDevices.addAll(actualConnectedDevices);
         }
-        
-        for(USBStorageDevice dev : actualConnectedDevices) {
+
+        for (USBStorageDevice dev : actualConnectedDevices) {
             event = new USBStorageEvent(dev, DeviceEventType.CONNECTED);
             sendEventToListeners(event);
         }
@@ -113,13 +112,14 @@ public class USBDeviceDetectorManager {
         @Override
         public void run() {
             try {
-	        logger.trace("Pooling refresh task is running");
-            
+                logger.trace("Pooling refresh task is running");
+
                 List<USBStorageDevice> actualConnectedDevices = AbstractStorageDeviceDetector.getInstance().getRemovableDevices();
 
                 updateState(actualConnectedDevices);
-	    } catch(Exception e) {
-	    }
+            } catch (Exception e) {
+                logger.error("Error while refreshing device list", e);
+            }
         }
 
     }
