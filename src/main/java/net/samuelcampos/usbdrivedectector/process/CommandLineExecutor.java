@@ -15,11 +15,13 @@
  */
 package net.samuelcampos.usbdrivedectector.process;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import org.apache.log4j.Logger;
 
 /**
  *
@@ -27,7 +29,7 @@ import org.apache.log4j.Logger;
  */
 public class CommandLineExecutor implements Closeable {
 
-    private static final Logger logger = Logger.getLogger(CommandLineExecutor.class);
+    private static final Logger logger = LoggerFactory.getLogger(CommandLineExecutor.class);
 
     private BufferedReader input = null;
     private Process process = null;

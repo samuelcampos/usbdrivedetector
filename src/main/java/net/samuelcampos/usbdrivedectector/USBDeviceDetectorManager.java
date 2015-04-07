@@ -15,25 +15,21 @@
  */
 package net.samuelcampos.usbdrivedectector;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import net.samuelcampos.usbdrivedectector.detectors.AbstractStorageDeviceDetector;
 import net.samuelcampos.usbdrivedectector.events.DeviceEventType;
 import net.samuelcampos.usbdrivedectector.events.IUSBDriveListener;
 import net.samuelcampos.usbdrivedectector.events.USBStorageEvent;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * @author samuelcampos
  */
 public class USBDeviceDetectorManager {
 
-    private static final Logger logger = Logger
+    private static final Logger logger = LoggerFactory
             .getLogger(USBDeviceDetectorManager.class);
 
     private static final long defaultPoolingInterval = 10 * 1000;

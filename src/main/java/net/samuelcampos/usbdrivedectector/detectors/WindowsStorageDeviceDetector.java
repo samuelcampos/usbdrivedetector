@@ -15,13 +15,15 @@
  */
 package net.samuelcampos.usbdrivedectector.detectors;
 
+import net.samuelcampos.usbdrivedectector.USBStorageDevice;
+import net.samuelcampos.usbdrivedectector.process.CommandLineExecutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import net.samuelcampos.usbdrivedectector.USBStorageDevice;
-import net.samuelcampos.usbdrivedectector.process.CommandLineExecutor;
-import org.apache.log4j.Logger;
 
 /**
  *
@@ -29,7 +31,7 @@ import org.apache.log4j.Logger;
  */
 public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector {
 
-    private static final Logger logger = Logger
+    private static final Logger logger = LoggerFactory
             .getLogger(WindowsStorageDeviceDetector.class);
 
     /**
