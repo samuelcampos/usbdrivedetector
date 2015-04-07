@@ -15,10 +15,12 @@
  */
 package net.samuelcampos.usbdrivedectector.detectors;
 
+import net.samuelcampos.usbdrivedectector.USBStorageDevice;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.util.List;
-import net.samuelcampos.usbdrivedectector.USBStorageDevice;
-import org.apache.log4j.Logger;
 
 /**
  * This class is prepared to:
@@ -31,7 +33,7 @@ import org.apache.log4j.Logger;
  */
 public abstract class AbstractStorageDeviceDetector {
 
-    private static final Logger logger = Logger
+    private static final Logger logger = LoggerFactory
             .getLogger(AbstractStorageDeviceDetector.class);
 
     private static final String OSName = System.getProperty("os.name")
