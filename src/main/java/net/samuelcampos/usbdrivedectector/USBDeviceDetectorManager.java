@@ -57,16 +57,16 @@ public class USBDeviceDetectorManager {
 
     public synchronized void start() {
         if (timer != null) {
-            timer.cancel();
+            timer = new Timer();
+            timer.scheduleAtFixedRate(new ListenerTask(), 0, currentPollingInterval);
         }
-        timer = new Timer();
-        timer.scheduleAtFixedRate(new ListenerTask(), currentPollingInterval, currentPollingInterval);
 
     }
 
     public synchronized void stop() {
         if (timer != null) {
             timer.cancel();
+            timer = null;
         }
     }
 
@@ -76,12 +76,17 @@ public class USBDeviceDetectorManager {
         }
 
         listeners.add(listener);
-
+        start();
         return true;
     }
 
     public synchronized boolean removeDriveListener(IUSBDriveListener listener) {
-        return listeners.remove(listener);
+        boolean removed = listeners.remove(listener);
+        if (listeners.isEmpty()) {
+            stop();
+        }
+
+        return removed;
     }
 
     public List<USBStorageDevice> getRemovableDevices() {
@@ -127,7 +132,7 @@ public class USBDeviceDetectorManager {
         @Override
         public void run() {
             try {
-                logger.trace("Pooling refresh task is running");
+                logger.trace("Polling refresh task is running");
 
                 List<USBStorageDevice> actualConnectedDevices = AbstractStorageDeviceDetector.getInstance().getRemovableDevices();
 
