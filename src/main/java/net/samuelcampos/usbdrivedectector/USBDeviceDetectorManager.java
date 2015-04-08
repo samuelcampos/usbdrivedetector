@@ -36,23 +36,38 @@ public class USBDeviceDetectorManager {
     private static final Logger logger = Logger
             .getLogger(USBDeviceDetectorManager.class);
 
-    private static final long defaultPoolingInterval = 10 * 1000;
+    private static final long DEFAULT_POLLING_INTERVAL = 10 * 1000;
+
+    private static long currentPollingInterval = DEFAULT_POLLING_INTERVAL;
 
     private Set<USBStorageDevice> connectedDevices;
     private List<IUSBDriveListener> listeners;
     private Timer timer;
 
     public USBDeviceDetectorManager() {
-        this(defaultPoolingInterval);
+        this(DEFAULT_POLLING_INTERVAL);
     }
 
-    public USBDeviceDetectorManager(long poolingInterval) {
+    public USBDeviceDetectorManager(long pollingInterval) {
         listeners = new ArrayList<IUSBDriveListener>();
 
         connectedDevices = new HashSet<USBStorageDevice>();
 
+    }
+
+    public synchronized void start() {
+        if (timer != null) {
+            timer.cancel();
+        }
         timer = new Timer();
-        timer.scheduleAtFixedRate(new ListenerTask(), poolingInterval, poolingInterval);
+        timer.scheduleAtFixedRate(new ListenerTask(), currentPollingInterval, currentPollingInterval);
+
+    }
+
+    public synchronized void stop() {
+        if (timer != null) {
+            timer.cancel();
+        }
     }
 
     public synchronized boolean addDriveListener(IUSBDriveListener listener) {
