@@ -38,16 +38,33 @@ public class USBDeviceDetectorManager {
 
     private static final long DEFAULT_POLLING_INTERVAL = 10 * 1000;
 
-    private static long currentPollingInterval = DEFAULT_POLLING_INTERVAL;
+    private long currentPollingInterval = DEFAULT_POLLING_INTERVAL;
 
     private Set<USBStorageDevice> connectedDevices;
-    private List<IUSBDriveListener> listeners;
+    private final ArrayList<IUSBDriveListener> listeners;
     private Timer timer;
 
+    /**
+     * Creates a new USBDeviceDetectorManager setting the polling interval to
+     * the default polling interval of 10 seconds.
+     */
     public USBDeviceDetectorManager() {
         this(DEFAULT_POLLING_INTERVAL);
     }
 
+    /**
+     * Creates a new USBDeviceDetectorManager
+     * <p>
+     * The polling interval is used as the update frequency for any attached
+     * listeners.
+     * </p>
+     * <p>
+     * Polling doesn't happen until at least one listener is attached.
+     * </p>
+     *
+     * @param pollingInterval the interval in milliseconds to poll for the USB
+     * storage devices on the system.
+     */
     public USBDeviceDetectorManager(long pollingInterval) {
         listeners = new ArrayList<IUSBDriveListener>();
 
@@ -55,6 +72,25 @@ public class USBDeviceDetectorManager {
 
     }
 
+    /**
+     * Start polling to update listeners at the specified polling interval.
+     *
+     * @param pollingInterval the interval in milliseconds to poll for the USB
+     * storage devices on the system.
+     */
+    public synchronized void start(long pollingInterval) {
+        currentPollingInterval = pollingInterval;
+        stop();
+        start();
+    }
+
+    /**
+     * Start polling to update listeners
+     * <p>
+     * This method only needs to be called if {@link #stop() stop()} has been
+     * called after listeners have been added.
+     * </p>
+     */
     public synchronized void start() {
         if (timer != null) {
             timer = new Timer();
@@ -63,6 +99,9 @@ public class USBDeviceDetectorManager {
 
     }
 
+    /**
+     * Forces the polling to stop, even if there are still listeners attached
+     */
     public synchronized void stop() {
         if (timer != null) {
             timer.cancel();
@@ -70,6 +109,17 @@ public class USBDeviceDetectorManager {
         }
     }
 
+    /**
+     * Adds an IUSBDriveListener.
+     * <p>
+     * The polling timer is automatically started as needed when a listener is
+     * added.
+     * </p>
+     *
+     * @param listener the listener to be updated with the attached drives
+     * @return true if the listener was not in the list and was successfully
+     * added
+     */
     public synchronized boolean addDriveListener(IUSBDriveListener listener) {
         if (listeners.contains(listener)) {
             return false;
@@ -80,6 +130,17 @@ public class USBDeviceDetectorManager {
         return true;
     }
 
+    /**
+     * Removes an IUSBDriveListener.
+     * <p>
+     * The polling timer is automatically stopped if this is the last listener
+     * being removed.
+     * </p>
+     *
+     * @param listener the listener to remove
+     * @return true if the listener existed in the list and was successfully
+     * removed
+     */
     public synchronized boolean removeDriveListener(IUSBDriveListener listener) {
         boolean removed = listeners.remove(listener);
         if (listeners.isEmpty()) {
@@ -89,6 +150,14 @@ public class USBDeviceDetectorManager {
         return removed;
     }
 
+    /**
+     * Gets a list of currently attached USB storage devices.
+     * <p>
+     * This method has no effect on polling or listeners being updated
+     * </p>
+     *
+     * @return list of attached USB storage devices.
+     */
     public List<USBStorageDevice> getRemovableDevices() {
         return AbstractStorageDeviceDetector.getInstance().getRemovableDevices();
     }
@@ -122,7 +191,16 @@ public class USBDeviceDetectorManager {
     }
 
     private void sendEventToListeners(USBStorageEvent event) {
-        for (IUSBDriveListener listener : listeners) {
+        /*
+         Make this thread safe, so we deal with a copy of listeners so any 
+         listeners being added or removed don't cause a ConcurrentModificationException.
+         Also allows listeners to remove themselves while processing the event
+         */
+        ArrayList<IUSBDriveListener> listenersCopy;
+        synchronized (listeners) {
+            listenersCopy = (ArrayList<IUSBDriveListener>) listeners.clone();
+        }
+        for (IUSBDriveListener listener : listenersCopy) {
             listener.usbDriveEvent(event);
         }
     }
