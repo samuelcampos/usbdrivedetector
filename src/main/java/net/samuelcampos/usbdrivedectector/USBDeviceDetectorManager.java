@@ -201,7 +201,11 @@ public class USBDeviceDetectorManager {
             listenersCopy = (ArrayList<IUSBDriveListener>) listeners.clone();
         }
         for (IUSBDriveListener listener : listenersCopy) {
-            listener.usbDriveEvent(event);
+            try {
+                listener.usbDriveEvent(event);
+            } catch (Exception ex) {
+                logger.error("An IUSBDriveListener threw an exception", ex);
+            }
         }
     }
 
