@@ -20,6 +20,7 @@ import net.samuelcampos.usbdrivedectector.process.CommandLineExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.filechooser.FileSystemView;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,7 +57,8 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
             while ((outputLine = commandExecutor.readOutputLine()) != null) {
 
                 if (!outputLine.isEmpty() && !"DeviceID".equals(outputLine)) {
-                    addUSBDevice(listDevices, outputLine + File.separatorChar);
+                    String rootPath = outputLine + File.separatorChar;
+                    addUSBDevice(listDevices, rootPath, getDeviceName(rootPath));
                 }
             }
 
@@ -71,6 +73,23 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
         }
 
         return listDevices;
+    }
+
+    private String getDeviceName(String rootPath) {
+        File f = new File(rootPath);
+        FileSystemView v = FileSystemView.getFileSystemView();
+        String name = v.getSystemDisplayName(f);
+        if (name != null) {
+            int idx = name.lastIndexOf('(');
+            if (idx != -1) {
+                name = name.substring(0, idx);
+            }
+            name = name.trim();
+            if (name.isEmpty()) {
+                name = null;
+            }
+        }
+        return name;
     }
 
     /**

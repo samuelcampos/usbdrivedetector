@@ -78,13 +78,17 @@ public abstract class AbstractStorageDeviceDetector {
     public abstract List<USBStorageDevice> getRemovableDevices();
 
     protected static void addUSBDevice(List<USBStorageDevice> listDevices, String rootPath) {
+        addUSBDevice(listDevices, rootPath, null);
+    }
+
+    protected static void addUSBDevice(List<USBStorageDevice> listDevices, String rootPath, String deviceName) {
         File root = new File(rootPath);
 
         if (logger.isTraceEnabled()) {
             logger.trace("Device found: " + root.getPath());
         }
 
-        USBStorageDevice device = new USBStorageDevice(root);
+        USBStorageDevice device = new USBStorageDevice(root, deviceName);
         listDevices.add(device);
     }
 }
