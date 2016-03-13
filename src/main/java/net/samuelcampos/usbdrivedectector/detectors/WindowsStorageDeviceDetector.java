@@ -48,7 +48,7 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
 
     @Override
     public List<USBStorageDevice> getRemovableDevices() {
-        ArrayList<USBStorageDevice> listDevices = new ArrayList<USBStorageDevice>();
+        ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
         try {
             commandExecutor.executeCommand(windowsDetectUSBCommand);
@@ -79,11 +79,13 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
         File f = new File(rootPath);
         FileSystemView v = FileSystemView.getFileSystemView();
         String name = v.getSystemDisplayName(f);
+
         if (name != null) {
             int idx = name.lastIndexOf('(');
             if (idx != -1) {
                 name = name.substring(0, idx);
             }
+
             name = name.trim();
             if (name.isEmpty()) {
                 name = null;

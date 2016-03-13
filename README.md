@@ -8,6 +8,6 @@ To include this library in your project just use:
 <dependency>
     <groupId>net.samuelcampos</groupId>
     <artifactId>usbdrivedectector</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 ```

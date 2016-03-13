@@ -38,12 +38,9 @@ public class USBDeviceDetectorManager {
 
     private Set<USBStorageDevice> connectedDevices;
     private final ArrayList<IUSBDriveListener> listeners;
-    private Timer timer;
+    private ListenerTask listenerTask;
 
-    /**
-     * Creates a new USBDeviceDetectorManager setting the polling interval to
-     * the default polling interval of 10 seconds.
-     */
+
     public USBDeviceDetectorManager() {
         this(DEFAULT_POLLING_INTERVAL);
     }
@@ -57,27 +54,31 @@ public class USBDeviceDetectorManager {
      * <p>
      * Polling doesn't happen until at least one listener is attached.
      * </p>
-     *
-     * @param pollingInterval the interval in milliseconds to poll for the USB
-     * storage devices on the system.
      */
     public USBDeviceDetectorManager(long pollingInterval) {
-        listeners = new ArrayList<IUSBDriveListener>();
+        listeners = new ArrayList<>();
+        connectedDevices = new HashSet<>();
 
-        connectedDevices = new HashSet<USBStorageDevice>();
-
+        currentPollingInterval = pollingInterval;
     }
 
     /**
-     * Start polling to update listeners at the specified polling interval.
+     * Sets the polling interval
      *
      * @param pollingInterval the interval in milliseconds to poll for the USB
-     * storage devices on the system.
+     *                        storage devices on the system.
      */
-    public synchronized void start(long pollingInterval) {
+    public synchronized void setPoolingInterval(long pollingInterval) {
+        if (pollingInterval <= 0) {
+            throw new IllegalArgumentException("pollingInterval must be a positive value");
+        }
+
         currentPollingInterval = pollingInterval;
-        stop();
-        start();
+
+        if (listeners.size() > 0) {
+            stop();
+            start();
+        }
     }
 
     /**
@@ -87,21 +88,20 @@ public class USBDeviceDetectorManager {
      * called after listeners have been added.
      * </p>
      */
-    public synchronized void start() {
-        if (timer != null) {
-            timer = new Timer();
-            timer.scheduleAtFixedRate(new ListenerTask(), 0, currentPollingInterval);
+    private synchronized void start() {
+        if (listenerTask == null) {
+            listenerTask = new ListenerTask(currentPollingInterval);
+            listenerTask.start();
         }
-
     }
 
     /**
      * Forces the polling to stop, even if there are still listeners attached
      */
-    public synchronized void stop() {
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
+    private synchronized void stop() {
+        if (listenerTask != null) {
+            listenerTask.interrupt();
+            listenerTask = null;
         }
     }
 
@@ -205,18 +205,41 @@ public class USBDeviceDetectorManager {
         }
     }
 
-    private class ListenerTask extends TimerTask {
+    private class ListenerTask extends Thread {
+
+        private long pollingInterval;
+
+        public ListenerTask(long pollingInterval) {
+            this.pollingInterval = pollingInterval;
+
+            setDaemon(true);
+        }
 
         @Override
         public void run() {
             try {
-                logger.trace("Polling refresh task is running");
+                while (true) {
+                    try {
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Polling refresh task is running");
+                        }
 
-                List<USBStorageDevice> actualConnectedDevices = AbstractStorageDeviceDetector.getInstance().getRemovableDevices();
+                        List<USBStorageDevice> actualConnectedDevices = AbstractStorageDeviceDetector.getInstance().getRemovableDevices();
 
-                updateState(actualConnectedDevices);
-            } catch (Exception e) {
-                logger.error("Error while refreshing device list", e);
+                        updateState(actualConnectedDevices);
+
+                    } catch (Exception e) {
+                        if (logger.isErrorEnabled()) {
+                            logger.error("Error while refreshing device list", e);
+                        }
+                    }
+
+                    sleep(pollingInterval);
+                }
+            } catch (InterruptedException ex) {
+                if (logger.isErrorEnabled()) {
+                    logger.error("Stopping polling thread", ex);
+                }
             }
         }
 

@@ -9,16 +9,22 @@ import net.samuelcampos.usbdrivedectector.events.USBStorageEvent;
  */
 public class SimpleTest implements IUSBDriveListener{
     public static void main(String[] args) {
+        System.out.println("Start Test");
 		USBDeviceDetectorManager driveDetector = new USBDeviceDetectorManager();
 
-		for (USBStorageDevice rmDevice : driveDetector.getRemovableDevices()) {
-
-			System.out.println(rmDevice);
-		}
+        driveDetector.getRemovableDevices().forEach(System.out::println);
         
         SimpleTest sTest = new SimpleTest();
         
         driveDetector.addDriveListener(sTest);
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Test finished");
 	}
     
     private SimpleTest () {

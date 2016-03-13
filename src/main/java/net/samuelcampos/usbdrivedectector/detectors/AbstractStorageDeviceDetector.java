@@ -85,10 +85,16 @@ public abstract class AbstractStorageDeviceDetector {
         File root = new File(rootPath);
 
         if (logger.isTraceEnabled()) {
-            logger.trace("Device found: " + root.getPath());
+            logger.trace("Device found: {}", root.getPath());
         }
 
-        USBStorageDevice device = new USBStorageDevice(root, deviceName);
-        listDevices.add(device);
+        try {
+            USBStorageDevice device = new USBStorageDevice(root, deviceName);
+            listDevices.add(device);
+        } catch (IllegalArgumentException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Could not add Device: {}", e.getMessage(), e);
+            }
+        }
     }
 }
