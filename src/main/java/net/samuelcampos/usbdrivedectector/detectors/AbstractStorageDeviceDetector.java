@@ -67,7 +67,7 @@ public abstract class AbstractStorageDeviceDetector {
         return instance;
     }
 
-    public AbstractStorageDeviceDetector() {
+    protected AbstractStorageDeviceDetector() {
     }
 
     /**

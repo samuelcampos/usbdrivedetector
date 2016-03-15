@@ -16,7 +16,7 @@
 package net.samuelcampos.usbdrivedectector.detectors;
 
 import net.samuelcampos.usbdrivedectector.USBStorageDevice;
-import net.samuelcampos.usbdrivedectector.process.CommandLineExecutor;
+import net.samuelcampos.usbdrivedectector.process.CommandExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,48 +32,33 @@ import java.util.regex.Pattern;
  */
 public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(OSXStorageDeviceDetector.class);
+    private static final Logger logger = LoggerFactory.getLogger(OSXStorageDeviceDetector.class);
 
-    private static final String osXDetectUSBCommand = "system_profiler SPUSBDataType";
+    /**
+     * system_profiler SPUSBDataType | grep "BSD Name:\|Mount Point:"
+     */
+    private static final String CMD_SYSTEM_PROFILER_USB = "system_profiler SPUSBDataType";
     private static final Pattern macOSXPattern = Pattern.compile("^.*Mount Point: (.+)$");
 
-    private final CommandLineExecutor commandExecutor;
-
-    public OSXStorageDeviceDetector() {
+    protected OSXStorageDeviceDetector() {
         super();
-
-        commandExecutor = new CommandLineExecutor();
     }
 
     @Override
     public List<USBStorageDevice> getRemovableDevices() {
-        ArrayList<USBStorageDevice> listDevices = new ArrayList<USBStorageDevice>();
+        ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
-        try {
-            /**
-             * system_profiler SPUSBDataType | grep "BSD Name:\|Mount Point:"
-             */
-            commandExecutor.executeCommand(osXDetectUSBCommand);
-
-            String outputLine;
-            
-            while ((outputLine = commandExecutor.readOutputLine()) != null) {
+        try (CommandExecutor commandExecutor = new CommandExecutor(CMD_SYSTEM_PROFILER_USB)){
+            commandExecutor.processOutput((String outputLine) -> {
                 Matcher matcher = macOSXPattern.matcher(outputLine);
 
                 if (matcher.matches()) {
                     addUSBDevice(listDevices, matcher.group(1));
                 }
-            }
+            });
 
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
-        } finally {
-            try {
-                commandExecutor.close();
-            } catch (IOException e) {
-                logger.error(e.getMessage(), e);
-            }
         }
 
         return listDevices;

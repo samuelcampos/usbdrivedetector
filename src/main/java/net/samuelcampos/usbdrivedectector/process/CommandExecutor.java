@@ -18,23 +18,22 @@ package net.samuelcampos.usbdrivedectector.process;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  *
  * @author samuelcampos
  */
-public class CommandLineExecutor implements Closeable {
+public class CommandExecutor implements Closeable {
 
-    private static final Logger logger = LoggerFactory.getLogger(CommandLineExecutor.class);
+    private static final Logger logger = LoggerFactory.getLogger(CommandExecutor.class);
 
     private BufferedReader input = null;
     private Process process = null;
 
-    public void executeCommand(String command) throws IOException {
+    public CommandExecutor(String command) throws IOException {
         if (logger.isTraceEnabled()) {
             logger.trace("Running command: " + command);
         }
@@ -44,14 +43,34 @@ public class CommandLineExecutor implements Closeable {
         input = new BufferedReader(new InputStreamReader(process.getInputStream()));
     }
 
-    public String readOutputLine() throws IOException {
-        if(input == null)
+    public void processOutput(Consumer<String> method) throws IOException{
+        String outputLine;
+        while ((outputLine = this.readOutputLine()) != null) {
+            method.accept(outputLine);
+        }
+    }
+
+    public boolean checkOutput(Predicate<String> method) throws IOException{
+        String outputLine;
+        while ((outputLine = this.readOutputLine()) != null) {
+            if (method.test(outputLine)){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private String readOutputLine() throws IOException {
+        if(input == null) {
             throw new IllegalStateException("You need to call 'executeCommand' method first");
+        }
         
          String outputLine = input.readLine();
          
-         if(outputLine != null)
-            return outputLine.trim();
+         if(outputLine != null) {
+             return outputLine.trim();
+         }
          
          return null;
     }

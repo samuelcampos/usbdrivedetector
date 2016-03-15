@@ -16,7 +16,7 @@
 package net.samuelcampos.usbdrivedectector.detectors;
 
 import net.samuelcampos.usbdrivedectector.USBStorageDevice;
-import net.samuelcampos.usbdrivedectector.process.CommandLineExecutor;
+import net.samuelcampos.usbdrivedectector.process.CommandExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,42 +32,31 @@ import java.util.List;
  */
 public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(WindowsStorageDeviceDetector.class);
+    private static final Logger logger = LoggerFactory.getLogger(WindowsStorageDeviceDetector.class);
 
     /**
      * wmic logicaldisk where drivetype=2 get description,deviceid,volumename
      */
-    private static final String windowsDetectUSBCommand = "wmic logicaldisk where drivetype=2 get deviceid";
+    private static final String CMD_WMI_USB = "wmic logicaldisk where drivetype=2 get deviceid";
 
-    private final CommandLineExecutor commandExecutor;
-
-    public WindowsStorageDeviceDetector() {
-        commandExecutor = new CommandLineExecutor();
+    protected WindowsStorageDeviceDetector() {
+        super();
     }
 
     @Override
     public List<USBStorageDevice> getRemovableDevices() {
         ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
-        try {
-            commandExecutor.executeCommand(windowsDetectUSBCommand);
-
-            String outputLine;
-            while ((outputLine = commandExecutor.readOutputLine()) != null) {
-
+        try (CommandExecutor commandExecutor = new CommandExecutor(CMD_WMI_USB)){
+            commandExecutor.processOutput((String outputLine) -> {
                 if (!outputLine.isEmpty() && !"DeviceID".equals(outputLine)) {
                     String rootPath = outputLine + File.separatorChar;
                     addUSBDevice(listDevices, rootPath, getDeviceName(rootPath));
                 }
-            }
+            });
 
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        } finally {
-            try {
-                commandExecutor.close();
-            } catch (IOException e) {
+            if (logger.isErrorEnabled()) {
                 logger.error(e.getMessage(), e);
             }
         }

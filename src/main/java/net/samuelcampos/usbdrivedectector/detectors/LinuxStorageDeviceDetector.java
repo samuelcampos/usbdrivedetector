@@ -16,13 +16,12 @@
 package net.samuelcampos.usbdrivedectector.detectors;
 
 import net.samuelcampos.usbdrivedectector.USBStorageDevice;
-import net.samuelcampos.usbdrivedectector.process.CommandLineExecutor;
+import net.samuelcampos.usbdrivedectector.process.CommandExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,43 +32,26 @@ import java.util.regex.Pattern;
  */
 public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(LinuxStorageDeviceDetector.class);
+    private static final Logger logger = LoggerFactory.getLogger(LinuxStorageDeviceDetector.class);
 
-    private static final String linuxDetectUSBCommand1 = "df";
+    private static final String CMD_DF = "df";
     private static final Pattern command1Pattern = Pattern.compile("^(\\/[^ ]+)[^%]+%[ ]+(.+)$");
-    private static final String linuxDetectUSBCommand2 = "udevadm info -q property -n ";
+
+    private static final String CMD_CHECK_USB = "udevadm info -q property -n ";
     private static final String strDeviceVerifier = "ID_USB_DRIVER=usb-storage";
 
-    private final CommandLineExecutor commandExecutor1, commandExecutor2;
-
-    public LinuxStorageDeviceDetector() {
+    protected LinuxStorageDeviceDetector() {
         super();
-
-        commandExecutor1 = new CommandLineExecutor();
-        commandExecutor2 = new CommandLineExecutor();
     }
 
     private boolean isUSBStorage(String device) {
-        String verifyCommand = linuxDetectUSBCommand2 + device;
+        String verifyCommand = CMD_CHECK_USB + device;
 
-        try {
-            commandExecutor2.executeCommand(verifyCommand);
-
-            String outputLine;
-            while ((outputLine = commandExecutor2.readOutputLine()) != null) {
-                if (strDeviceVerifier.equals(outputLine)) {
-                    return true;
-                }
-            }
+        try (CommandExecutor commandExecutor = new CommandExecutor(verifyCommand)){
+//            return commandExecutor.checkOutput((String outputLine) -> strDeviceVerifier.equals(outputLine));
+            return commandExecutor.checkOutput(strDeviceVerifier::equals);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
-        } finally {
-            try {
-                commandExecutor2.close();
-            } catch (IOException e) {
-                logger.error(e.getMessage(), e);
-            }
         }
 
         return false;
@@ -77,13 +59,10 @@ public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
 
     @Override
     public List<USBStorageDevice> getRemovableDevices() {
-        ArrayList<USBStorageDevice> listDevices = new ArrayList<USBStorageDevice>();
+        ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
-        try {
-            commandExecutor1.executeCommand(linuxDetectUSBCommand1);
-
-            String outputLine;
-            while ((outputLine = commandExecutor1.readOutputLine()) != null) {
+        try (CommandExecutor commandExecutor = new CommandExecutor(CMD_DF)){
+            commandExecutor.processOutput((String outputLine) -> {
                 Matcher matcher = command1Pattern.matcher(outputLine);
 
                 if (matcher.matches()) {
@@ -94,16 +73,10 @@ public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
                         addUSBDevice(listDevices, rootPath);
                     }
                 }
-            }
+            });
 
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
-        } finally {
-            try {
-                commandExecutor1.close();
-            } catch (IOException e) {
-                logger.error(e.getMessage(), e);
-            }
         }
 
         return listDevices;
