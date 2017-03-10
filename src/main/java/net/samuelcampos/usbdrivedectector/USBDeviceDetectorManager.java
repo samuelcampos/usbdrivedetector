@@ -54,6 +54,9 @@ public class USBDeviceDetectorManager {
      * <p>
      * Polling doesn't happen until at least one listener is attached.
      * </p>
+     *
+     * @param pollingInterval the interval in milliseconds to poll for the USB
+     *                        storage devices on the system.
      */
     public USBDeviceDetectorManager(long pollingInterval) {
         listeners = new ArrayList<>();

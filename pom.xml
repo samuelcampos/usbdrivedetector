@@ -15,6 +15,35 @@
     <name>USB Drive Dectector</name>
     <description>A Java library to get a list of all usb storage devices connected to the computer. It works on the three main operating systems (Windows, Linux and OS X).</description>
     <url>http://www.samuelcampos.net</url>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <slf4j.version>1.7.24</slf4j.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
     
     <licenses>
         <license>
@@ -101,33 +130,6 @@
             </plugin>
         </plugins>
     </build>
-    
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.19</version>
-        </dependency>
-
-        <!-- Test dependencies -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.19</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-    
     
     <distributionManagement>
         <snapshotRepository>
