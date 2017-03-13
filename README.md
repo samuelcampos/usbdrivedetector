@@ -1,5 +1,7 @@
 # USB Drive Detector
 
+[![Build Status](https://travis-ci.org/samuelcampos/usbdrivedetector.svg?branch=master)](https://travis-ci.org/samuelcampos/usbdrivedetector)
+
 A Java library to get a list of all usb storage devices connected to the computer. It works on the three main operating systems (Windows, Linux and OS X).
 
 ###Maven dependency
