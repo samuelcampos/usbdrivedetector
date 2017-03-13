@@ -44,29 +44,27 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
     }
 
     @Override
-    public List<USBStorageDevice> getRemovableDevices() {
-        ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
+    public List<USBStorageDevice> getStorageDevicesDevices() {
+        final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
         try (CommandExecutor commandExecutor = new CommandExecutor(CMD_WMI_USB)){
             commandExecutor.processOutput((String outputLine) -> {
                 if (!outputLine.isEmpty() && !"DeviceID".equals(outputLine)) {
                     String rootPath = outputLine + File.separatorChar;
-                    addUSBDevice(listDevices, rootPath, getDeviceName(rootPath));
+                    listDevices.add(getUSBDevice(rootPath, getDeviceName(rootPath)));
                 }
             });
 
         } catch (IOException e) {
-            if (logger.isErrorEnabled()) {
-                logger.error(e.getMessage(), e);
-            }
+            logger.error(e.getMessage(), e);
         }
 
         return listDevices;
     }
 
     private String getDeviceName(String rootPath) {
-        File f = new File(rootPath);
-        FileSystemView v = FileSystemView.getFileSystemView();
+        final File f = new File(rootPath);
+        final FileSystemView v = FileSystemView.getFileSystemView();
         String name = v.getSystemDisplayName(f);
 
         if (name != null) {

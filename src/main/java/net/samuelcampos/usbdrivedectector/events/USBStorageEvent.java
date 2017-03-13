@@ -26,7 +26,7 @@ public class USBStorageEvent {
     private final USBStorageDevice storageDevice;
     private final DeviceEventType eventType;
     
-    public USBStorageEvent(USBStorageDevice storageDevice, DeviceEventType eventType) {
+    public USBStorageEvent(final USBStorageDevice storageDevice, final DeviceEventType eventType) {
         this.storageDevice = storageDevice;
         this.eventType = eventType;
     }

@@ -30,10 +30,10 @@ public class CommandExecutor implements Closeable {
 
     private static final Logger logger = LoggerFactory.getLogger(CommandExecutor.class);
 
-    private BufferedReader input = null;
-    private Process process = null;
+    private final BufferedReader input;
+    private final Process process;
 
-    public CommandExecutor(String command) throws IOException {
+    public CommandExecutor(final String command) throws IOException {
         if (logger.isTraceEnabled()) {
             logger.trace("Running command: " + command);
         }
@@ -43,14 +43,14 @@ public class CommandExecutor implements Closeable {
         input = new BufferedReader(new InputStreamReader(process.getInputStream()));
     }
 
-    public void processOutput(Consumer<String> method) throws IOException{
+    public void processOutput(final Consumer<String> method) throws IOException{
         String outputLine;
         while ((outputLine = this.readOutputLine()) != null) {
             method.accept(outputLine);
         }
     }
 
-    public boolean checkOutput(Predicate<String> method) throws IOException{
+    public boolean checkOutput(final Predicate<String> method) throws IOException{
         String outputLine;
         while ((outputLine = this.readOutputLine()) != null) {
             if (method.test(outputLine)){
@@ -88,9 +88,6 @@ public class CommandExecutor implements Closeable {
         if (process != null) {
             process.destroy();
         }
-
-        input = null;
-        process = null;
     }
 
 }

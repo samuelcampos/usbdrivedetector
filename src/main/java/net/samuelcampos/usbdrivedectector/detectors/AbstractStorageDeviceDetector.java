@@ -71,30 +71,27 @@ public abstract class AbstractStorageDeviceDetector {
     }
 
     /**
-     * Returns the storage devices connected to the computer.
+     * Returns the all storage devices currently connected to the computer.
      *
      * @return the list of the USB storage devices
      */
-    public abstract List<USBStorageDevice> getRemovableDevices();
+    public abstract List<USBStorageDevice> getStorageDevicesDevices();
 
-    protected static void addUSBDevice(List<USBStorageDevice> listDevices, String rootPath) {
-        addUSBDevice(listDevices, rootPath, null);
+    static USBStorageDevice getUSBDevice(final String rootPath) {
+        return getUSBDevice(rootPath, null);
     }
 
-    protected static void addUSBDevice(List<USBStorageDevice> listDevices, String rootPath, String deviceName) {
-        File root = new File(rootPath);
+    static USBStorageDevice getUSBDevice(final String rootPath, final String deviceName) {
+        final File root = new File(rootPath);
 
-        if (logger.isTraceEnabled()) {
-            logger.trace("Device found: {}", root.getPath());
-        }
+        logger.trace("Device found: {}", root.getPath());
 
         try {
-            USBStorageDevice device = new USBStorageDevice(root, deviceName);
-            listDevices.add(device);
+            return new USBStorageDevice(root, deviceName);
         } catch (IllegalArgumentException e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Could not add Device: {}", e.getMessage(), e);
-            }
+            logger.debug("Could not add Device: {}", e.getMessage(), e);
         }
+
+        return null;
     }
 }

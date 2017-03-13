@@ -58,8 +58,8 @@ public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
     }
 
     @Override
-    public List<USBStorageDevice> getRemovableDevices() {
-        ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
+    public List<USBStorageDevice> getStorageDevicesDevices() {
+        final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
         try (CommandExecutor commandExecutor = new CommandExecutor(CMD_DF)){
             commandExecutor.processOutput((String outputLine) -> {
@@ -70,7 +70,7 @@ public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
                     String rootPath = matcher.group(2);
 
                     if (isUSBStorage(device)) {
-                        addUSBDevice(listDevices, rootPath);
+                        listDevices.add(getUSBDevice(rootPath));
                     }
                 }
             });

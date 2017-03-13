@@ -15,6 +15,7 @@
  */
 package net.samuelcampos.usbdrivedectector;
 
+import com.google.common.base.Preconditions;
 import net.samuelcampos.usbdrivedectector.detectors.AbstractStorageDeviceDetector;
 import net.samuelcampos.usbdrivedectector.events.DeviceEventType;
 import net.samuelcampos.usbdrivedectector.events.IUSBDriveListener;
@@ -32,11 +33,14 @@ public class USBDeviceDetectorManager {
     private static final Logger logger = LoggerFactory
             .getLogger(USBDeviceDetectorManager.class);
 
-    private static final long DEFAULT_POLLING_INTERVAL = 10 * 1000;
+    /**
+     * The default pooling interval is 10 seconds
+     */
+    private static final long DEFAULT_POLLING_INTERVAL = 10000;
 
     private long currentPollingInterval = DEFAULT_POLLING_INTERVAL;
 
-    private Set<USBStorageDevice> connectedDevices;
+    private final Set<USBStorageDevice> connectedDevices;
     private final ArrayList<IUSBDriveListener> listeners;
     private ListenerTask listenerTask;
 
@@ -71,10 +75,8 @@ public class USBDeviceDetectorManager {
      * @param pollingInterval the interval in milliseconds to poll for the USB
      *                        storage devices on the system.
      */
-    public synchronized void setPoolingInterval(long pollingInterval) {
-        if (pollingInterval <= 0) {
-            throw new IllegalArgumentException("pollingInterval must be a positive value");
-        }
+    public synchronized void setPoolingInterval(final long pollingInterval) {
+        Preconditions.checkArgument(pollingInterval > 0, "pollingInterval must be greater than 0");
 
         currentPollingInterval = pollingInterval;
 
@@ -119,7 +121,7 @@ public class USBDeviceDetectorManager {
      * @return true if the listener was not in the list and was successfully
      * added
      */
-    public synchronized boolean addDriveListener(IUSBDriveListener listener) {
+    public synchronized boolean addDriveListener(final IUSBDriveListener listener) {
         if (listeners.contains(listener)) {
             return false;
         }
@@ -140,7 +142,7 @@ public class USBDeviceDetectorManager {
      * @return true if the listener existed in the list and was successfully
      * removed
      */
-    public synchronized boolean removeDriveListener(IUSBDriveListener listener) {
+    public synchronized boolean removeDriveListener(final IUSBDriveListener listener) {
         boolean removed = listeners.remove(listener);
         if (listeners.isEmpty()) {
             stop();
@@ -158,35 +160,38 @@ public class USBDeviceDetectorManager {
      * @return list of attached USB storage devices.
      */
     public List<USBStorageDevice> getRemovableDevices() {
-        return AbstractStorageDeviceDetector.getInstance().getRemovableDevices();
+        return AbstractStorageDeviceDetector.getInstance().getStorageDevicesDevices();
     }
 
-    private void updateState(List<USBStorageDevice> actualConnectedDevices) {
-        USBStorageEvent event;
+    /**
+     * Updates the internal state of this manager and sends
+     *
+     * @param currentConnectedDevices a list with the currently connected USB storage devices
+     */
+    private void updateConnectedDevices(final List<USBStorageDevice> currentConnectedDevices) {
+        final List<USBStorageDevice> removedDevices = new ArrayList<>();
+        final List<USBStorageDevice> newDevices = currentConnectedDevices;
 
         synchronized (this) {
-            Iterator<USBStorageDevice> itConnectedDevices = connectedDevices.iterator();
+            final Iterator<USBStorageDevice> itConnectedDevices = connectedDevices.iterator();
 
             while (itConnectedDevices.hasNext()) {
                 USBStorageDevice device = itConnectedDevices.next();
 
-                if (!actualConnectedDevices.contains(device)) {
-                    event = new USBStorageEvent(device, DeviceEventType.REMOVED);
-                    sendEventToListeners(event);
+                if (currentConnectedDevices.contains(device)) {
+                    newDevices.remove(device);
+                } else {
+                    removedDevices.add(device);
 
                     itConnectedDevices.remove();
-                } else {
-                    actualConnectedDevices.remove(device);
                 }
             }
 
-            connectedDevices.addAll(actualConnectedDevices);
+            connectedDevices.addAll(newDevices);
         }
 
-        for (USBStorageDevice dev : actualConnectedDevices) {
-            event = new USBStorageEvent(dev, DeviceEventType.CONNECTED);
-            sendEventToListeners(event);
-        }
+        newDevices.forEach(device -> sendEventToListeners(new USBStorageEvent(device, DeviceEventType.CONNECTED)));
+        removedDevices.forEach(device -> sendEventToListeners(new USBStorageEvent(device, DeviceEventType.REMOVED)));
     }
 
     private void sendEventToListeners(USBStorageEvent event) {
@@ -199,6 +204,7 @@ public class USBDeviceDetectorManager {
         synchronized (listeners) {
             listenersCopy = (ArrayList<IUSBDriveListener>) listeners.clone();
         }
+
         for (IUSBDriveListener listener : listenersCopy) {
             try {
                 listener.usbDriveEvent(event);
@@ -210,9 +216,9 @@ public class USBDeviceDetectorManager {
 
     private class ListenerTask extends Thread {
 
-        private long pollingInterval;
+        private final long pollingInterval;
 
-        public ListenerTask(long pollingInterval) {
+        public ListenerTask(final long pollingInterval) {
             this.pollingInterval = pollingInterval;
 
             setDaemon(true);
@@ -221,28 +227,22 @@ public class USBDeviceDetectorManager {
         @Override
         public void run() {
             try {
-                while (true) {
+                while (!Thread.currentThread().isInterrupted()) {
                     try {
-                        if (logger.isTraceEnabled()) {
-                            logger.trace("Polling refresh task is running");
-                        }
+                        logger.trace("Polling refresh task is running");
 
-                        List<USBStorageDevice> actualConnectedDevices = AbstractStorageDeviceDetector.getInstance().getRemovableDevices();
+                        List<USBStorageDevice> actualConnectedDevices = AbstractStorageDeviceDetector.getInstance().getStorageDevicesDevices();
 
-                        updateState(actualConnectedDevices);
+                        updateConnectedDevices(actualConnectedDevices);
 
                     } catch (Exception e) {
-                        if (logger.isErrorEnabled()) {
-                            logger.error("Error while refreshing device list", e);
-                        }
+                        logger.error("Error while refreshing device list", e);
                     }
 
                     sleep(pollingInterval);
                 }
             } catch (InterruptedException ex) {
-                if (logger.isErrorEnabled()) {
-                    logger.error("Stopping polling thread", ex);
-                }
+                logger.error("Stopping polling thread", ex);
             }
         }
 

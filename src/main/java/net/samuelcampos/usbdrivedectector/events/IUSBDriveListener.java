@@ -22,6 +22,7 @@ package net.samuelcampos.usbdrivedectector.events;
  * 
  * @author samuelcampos
  */
+@FunctionalInterface
 public interface IUSBDriveListener {
     
     void usbDriveEvent(USBStorageEvent event);

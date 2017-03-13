@@ -25,10 +25,10 @@ import javax.swing.filechooser.FileSystemView;
  * @author samuelcampos
  */
 public class USBStorageDevice {
-	private File rootDirectory;
-	private String deviceName;
+	private final File rootDirectory;
+	private final String deviceName;
 	
-	public USBStorageDevice(File rootDirectory, String deviceName){
+	public USBStorageDevice(final File rootDirectory, String deviceName){
 		if(rootDirectory == null || !rootDirectory.isDirectory()){
 			throw new IllegalArgumentException("Invalid root file!");
 		}
@@ -42,7 +42,7 @@ public class USBStorageDevice {
         this.deviceName = deviceName;
 	}
 
-    public USBStorageDevice(File rootDirectory){
+    public USBStorageDevice(final File rootDirectory){
         this(rootDirectory, null);
 	}
     

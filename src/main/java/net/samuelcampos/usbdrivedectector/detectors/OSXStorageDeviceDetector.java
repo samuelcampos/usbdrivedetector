@@ -45,15 +45,15 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
     }
 
     @Override
-    public List<USBStorageDevice> getRemovableDevices() {
-        ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
+    public List<USBStorageDevice> getStorageDevicesDevices() {
+        final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
         try (CommandExecutor commandExecutor = new CommandExecutor(CMD_SYSTEM_PROFILER_USB)){
             commandExecutor.processOutput((String outputLine) -> {
-                Matcher matcher = macOSXPattern.matcher(outputLine);
+                final Matcher matcher = macOSXPattern.matcher(outputLine);
 
                 if (matcher.matches()) {
-                    addUSBDevice(listDevices, matcher.group(1));
+                    listDevices.add(getUSBDevice(matcher.group(1)));
                 }
             });
 
