@@ -48,8 +48,8 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
     public List<USBStorageDevice> getStorageDevicesDevices() {
         final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
-        try (CommandExecutor commandExecutor = new CommandExecutor(CMD_SYSTEM_PROFILER_USB)){
-            commandExecutor.processOutput((String outputLine) -> {
+        try (CommandExecutor commandExecutor = new CommandExecutor(CMD_SYSTEM_PROFILER_USB)) {
+            commandExecutor.processOutput(outputLine -> {
                 final Matcher matcher = macOSXPattern.matcher(outputLine);
 
                 if (matcher.matches()) {

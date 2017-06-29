@@ -41,7 +41,7 @@ public class USBDeviceDetectorManager {
     private long currentPollingInterval = DEFAULT_POLLING_INTERVAL;
 
     private final Set<USBStorageDevice> connectedDevices;
-    private final ArrayList<IUSBDriveListener> listeners;
+    private final List<IUSBDriveListener> listeners;
     private ListenerTask listenerTask;
 
 
@@ -62,7 +62,7 @@ public class USBDeviceDetectorManager {
      * @param pollingInterval the interval in milliseconds to poll for the USB
      *                        storage devices on the system.
      */
-    public USBDeviceDetectorManager(long pollingInterval) {
+    public USBDeviceDetectorManager(final long pollingInterval) {
         listeners = new ArrayList<>();
         connectedDevices = new HashSet<>();
 
@@ -143,7 +143,7 @@ public class USBDeviceDetectorManager {
      * removed
      */
     public synchronized boolean removeDriveListener(final IUSBDriveListener listener) {
-        boolean removed = listeners.remove(listener);
+        final boolean removed = listeners.remove(listener);
         if (listeners.isEmpty()) {
             stop();
         }
@@ -170,16 +170,15 @@ public class USBDeviceDetectorManager {
      */
     private void updateConnectedDevices(final List<USBStorageDevice> currentConnectedDevices) {
         final List<USBStorageDevice> removedDevices = new ArrayList<>();
-        final List<USBStorageDevice> newDevices = currentConnectedDevices;
 
         synchronized (this) {
             final Iterator<USBStorageDevice> itConnectedDevices = connectedDevices.iterator();
 
             while (itConnectedDevices.hasNext()) {
-                USBStorageDevice device = itConnectedDevices.next();
+                final USBStorageDevice device = itConnectedDevices.next();
 
                 if (currentConnectedDevices.contains(device)) {
-                    newDevices.remove(device);
+                    currentConnectedDevices.remove(device);
                 } else {
                     removedDevices.add(device);
 
@@ -187,22 +186,25 @@ public class USBDeviceDetectorManager {
                 }
             }
 
-            connectedDevices.addAll(newDevices);
+            connectedDevices.addAll(currentConnectedDevices);
         }
 
-        newDevices.forEach(device -> sendEventToListeners(new USBStorageEvent(device, DeviceEventType.CONNECTED)));
-        removedDevices.forEach(device -> sendEventToListeners(new USBStorageEvent(device, DeviceEventType.REMOVED)));
+        currentConnectedDevices.forEach(device ->
+                sendEventToListeners(new USBStorageEvent(device, DeviceEventType.CONNECTED)));
+
+        removedDevices.forEach(device ->
+                sendEventToListeners(new USBStorageEvent(device, DeviceEventType.REMOVED)));
     }
 
-    private void sendEventToListeners(USBStorageEvent event) {
+    private void sendEventToListeners(final USBStorageEvent event) {
         /*
          Make this thread safe, so we deal with a copy of listeners so any 
          listeners being added or removed don't cause a ConcurrentModificationException.
          Also allows listeners to remove themselves while processing the event
          */
-        ArrayList<IUSBDriveListener> listenersCopy;
+        final List<IUSBDriveListener> listenersCopy;
         synchronized (listeners) {
-            listenersCopy = (ArrayList<IUSBDriveListener>) listeners.clone();
+            listenersCopy = new ArrayList<>(listeners);
         }
 
         for (IUSBDriveListener listener : listenersCopy) {

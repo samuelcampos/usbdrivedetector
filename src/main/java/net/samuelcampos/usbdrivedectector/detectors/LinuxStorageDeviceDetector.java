@@ -44,11 +44,10 @@ public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
         super();
     }
 
-    private boolean isUSBStorage(String device) {
-        String verifyCommand = CMD_CHECK_USB + device;
+    private boolean isUSBStorage(final String device) {
+        final String verifyCommand = CMD_CHECK_USB + device;
 
-        try (CommandExecutor commandExecutor = new CommandExecutor(verifyCommand)){
-//            return commandExecutor.checkOutput((String outputLine) -> strDeviceVerifier.equals(outputLine));
+        try (CommandExecutor commandExecutor = new CommandExecutor(verifyCommand)) {
             return commandExecutor.checkOutput(strDeviceVerifier::equals);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
@@ -63,11 +62,11 @@ public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
 
         try (CommandExecutor commandExecutor = new CommandExecutor(CMD_DF)){
             commandExecutor.processOutput((String outputLine) -> {
-                Matcher matcher = command1Pattern.matcher(outputLine);
+                final Matcher matcher = command1Pattern.matcher(outputLine);
 
                 if (matcher.matches()) {
-                    String device = matcher.group(1);
-                    String rootPath = matcher.group(2);
+                    final String device = matcher.group(1);
+                    final String rootPath = matcher.group(2);
 
                     if (isUSBStorage(device)) {
                         listDevices.add(getUSBDevice(rootPath));

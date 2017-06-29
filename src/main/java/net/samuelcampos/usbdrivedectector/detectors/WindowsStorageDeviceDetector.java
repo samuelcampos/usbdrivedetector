@@ -47,10 +47,10 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
     public List<USBStorageDevice> getStorageDevicesDevices() {
         final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
-        try (CommandExecutor commandExecutor = new CommandExecutor(CMD_WMI_USB)){
-            commandExecutor.processOutput((String outputLine) -> {
+        try (CommandExecutor commandExecutor = new CommandExecutor(CMD_WMI_USB)) {
+            commandExecutor.processOutput(outputLine -> {
                 if (!outputLine.isEmpty() && !"DeviceID".equals(outputLine)) {
-                    String rootPath = outputLine + File.separatorChar;
+                    final String rootPath = outputLine + File.separatorChar;
                     listDevices.add(getUSBDevice(rootPath, getDeviceName(rootPath)));
                 }
             });
@@ -62,7 +62,7 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
         return listDevices;
     }
 
-    private String getDeviceName(String rootPath) {
+    private String getDeviceName(final String rootPath) {
         final File f = new File(rootPath);
         final FileSystemView v = FileSystemView.getFileSystemView();
         String name = v.getSystemDisplayName(f);

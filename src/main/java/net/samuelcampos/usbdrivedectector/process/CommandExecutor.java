@@ -53,7 +53,7 @@ public class CommandExecutor implements Closeable {
     public boolean checkOutput(final Predicate<String> method) throws IOException{
         String outputLine;
         while ((outputLine = this.readOutputLine()) != null) {
-            if (method.test(outputLine)){
+            if (method.test(outputLine)) {
                 return true;
             }
         }
@@ -66,7 +66,7 @@ public class CommandExecutor implements Closeable {
             throw new IllegalStateException("You need to call 'executeCommand' method first");
         }
         
-         String outputLine = input.readLine();
+         final String outputLine = input.readLine();
          
          if(outputLine != null) {
              return outputLine.trim();

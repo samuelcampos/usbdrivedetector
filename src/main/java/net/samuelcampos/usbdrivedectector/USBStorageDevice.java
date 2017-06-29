@@ -16,6 +16,8 @@
 
 package net.samuelcampos.usbdrivedectector;
 
+import com.google.common.base.Strings;
+
 import java.io.File;
 import javax.swing.filechooser.FileSystemView;
 
@@ -35,7 +37,7 @@ public class USBStorageDevice {
 		
 		this.rootDirectory = rootDirectory;
         
-        if(deviceName == null || deviceName.isEmpty()) {
+        if(Strings.isNullOrEmpty(deviceName)) {
             deviceName = rootDirectory.getName();
         }
         
@@ -109,7 +111,7 @@ public class USBStorageDevice {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (obj == null) {
             return false;
         }
