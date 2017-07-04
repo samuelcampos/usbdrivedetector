@@ -17,7 +17,7 @@ To include this library in your project just use:
 ```
 
 
-[travis-url]: https://travis-ci.org/samuelcampos/usbdrivedetector.svg?branch=master
+[travis-url]: https://travis-ci.org/samuelcampos/usbdrivedetector
 [travis-image]: https://travis-ci.org/samuelcampos/usbdrivedetector.svg?branch=master
 
 [maven-url]: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22usbdrivedectector%22
