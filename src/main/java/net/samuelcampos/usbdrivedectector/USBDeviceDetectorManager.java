@@ -23,7 +23,12 @@ import net.samuelcampos.usbdrivedectector.events.USBStorageEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 
 /**
  * @author samuelcampos
@@ -34,7 +39,7 @@ public class USBDeviceDetectorManager {
             .getLogger(USBDeviceDetectorManager.class);
 
     /**
-     * The default pooling interval is 10 seconds
+     * The default polling interval is 10 seconds
      */
     private static final long DEFAULT_POLLING_INTERVAL = 10000;
 
@@ -75,7 +80,7 @@ public class USBDeviceDetectorManager {
      * @param pollingInterval the interval in milliseconds to poll for the USB
      *                        storage devices on the system.
      */
-    public synchronized void setPoolingInterval(final long pollingInterval) {
+    public synchronized void setPollingInterval(final long pollingInterval) {
         Preconditions.checkArgument(pollingInterval > 0, "pollingInterval must be greater than 0");
 
         currentPollingInterval = pollingInterval;
