@@ -52,6 +52,7 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
     private static final String INFO_NAME = "Volume Name";
     
     private static final int MACOS_SIERRA = 12;
+    private static final int MACOS_ELCAPITAN = 11;
     
     private int macosVersion;
     
@@ -78,7 +79,7 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
     public List<USBStorageDevice> getStorageDevicesDevices() {
         final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
         
-        if(macosVersion >= MACOS_SIERRA){
+        if(macosVersion >= MACOS_ELCAPITAN){
         	try (CommandExecutor commandExecutor = new CommandExecutor(CMD_DF)) {
         		
         		commandExecutor.processOutput((String outputLine) -> {
