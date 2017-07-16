@@ -11,8 +11,8 @@ To include this library in your project just use:
 ```xml
 <dependency>
     <groupId>net.samuelcampos</groupId>
-    <artifactId>usbdrivedectector</artifactId>
-    <version>1.0.2</version>
+    <artifactId>usbdrivedetector</artifactId>
+    <version>2.0.0</version>
 </dependency>
 ```
 

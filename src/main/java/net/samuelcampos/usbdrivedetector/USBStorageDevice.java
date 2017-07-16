@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package net.samuelcampos.usbdrivedectector;
-
-import com.google.common.base.Strings;
+package net.samuelcampos.usbdrivedetector;
 
 import java.io.File;
 import javax.swing.filechooser.FileSystemView;
@@ -37,7 +35,7 @@ public class USBStorageDevice {
 		
 		this.rootDirectory = rootDirectory;
         
-        if(Strings.isNullOrEmpty(deviceName)) {
+        if(deviceName == null || deviceName.isEmpty()) {
             deviceName = rootDirectory.getName();
         }
         

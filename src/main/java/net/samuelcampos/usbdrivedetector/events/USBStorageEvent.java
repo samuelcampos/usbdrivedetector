@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package net.samuelcampos.usbdrivedectector.events;
+package net.samuelcampos.usbdrivedetector.events;
 
-import net.samuelcampos.usbdrivedectector.USBStorageDevice;
+import net.samuelcampos.usbdrivedetector.USBStorageDevice;
 
 /**
  *

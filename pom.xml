@@ -2,11 +2,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.samuelcampos</groupId>
-    <artifactId>usbdrivedectector</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <artifactId>usbdrivedetector</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>USB Drive Dectector</name>
+    <name>USB Drive Detector</name>
     <description>A Java library to get a list of all usb storage devices connected to the computer. It works on the three main operating systems (Windows, Linux and OS X).</description>
     <url>http://www.samuelcampos.net</url>
 
@@ -22,12 +22,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>22.0</version>
         </dependency>
 
         <!-- Test dependencies -->
