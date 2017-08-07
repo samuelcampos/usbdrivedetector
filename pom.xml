@@ -11,7 +11,7 @@
     <url>http://www.samuelcampos.net</url>
 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>1.6</java.version>
         <slf4j.version>1.7.25</slf4j.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

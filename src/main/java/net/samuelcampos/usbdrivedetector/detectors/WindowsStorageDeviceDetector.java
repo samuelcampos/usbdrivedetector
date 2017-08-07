@@ -32,106 +32,113 @@ import java.util.List;
  */
 public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector {
 
-    private static final Logger logger = LoggerFactory.getLogger(WindowsStorageDeviceDetector.class);
+	private static final Logger logger = LoggerFactory.getLogger(WindowsStorageDeviceDetector.class);
 
-    /**
-     * wmic logicaldisk where drivetype=2 get description,deviceid,volumename
-     */
-    private static final String CMD_WMI_USB = "wmic logicaldisk where drivetype=2 get deviceid";
+	/**
+	 * wmic logicaldisk where drivetype=2 get description,deviceid,volumename
+	 */
+	private static final String CMD_WMI_USB = "wmic logicaldisk where drivetype=2 get deviceid";
 
-    protected WindowsStorageDeviceDetector() {
-        super();
-    }
+	protected WindowsStorageDeviceDetector() {
+		super();
+	}
 
-    @Override
-    public List<USBStorageDevice> getStorageDevicesDevices() {
-        final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
+	@Override
+	public List<USBStorageDevice> getStorageDevicesDevices() {
+		final ArrayList<USBStorageDevice> listDevices = new ArrayList<USBStorageDevice>();
 
-        try (CommandExecutor commandExecutor = new CommandExecutor(CMD_WMI_USB)) {
-            commandExecutor.processOutput(outputLine -> {
-                if (!outputLine.isEmpty() && !"DeviceID".equals(outputLine)) {
-                    final String rootPath = outputLine + File.separatorChar;
-                    listDevices.add(getUSBDevice(rootPath, getDeviceName(rootPath)));
-                }
-            });
+		CommandExecutor commandExecutor = null;
 
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        }
+		try {
+			commandExecutor = new CommandExecutor(CMD_WMI_USB);
+			String outputLine = null;
+			
+			while((outputLine = commandExecutor.readOutputLine()) != null){
+				if (!outputLine.isEmpty() && !"DeviceID".equals(outputLine)) {
+					final String rootPath = outputLine + File.separatorChar;
+					listDevices.add(getUSBDevice(rootPath, getDeviceName(rootPath)));
+				}
+			}
 
-        return listDevices;
-    }
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
 
-    private String getDeviceName(final String rootPath) {
-        final File f = new File(rootPath);
-        final FileSystemView v = FileSystemView.getFileSystemView();
-        String name = v.getSystemDisplayName(f);
+		closeCommand(commandExecutor);
+		
+		return listDevices;
+	}
 
-        if (name != null) {
-            int idx = name.lastIndexOf('(');
-            if (idx != -1) {
-                name = name.substring(0, idx);
-            }
+	private String getDeviceName(final String rootPath) {
+		final File f = new File(rootPath);
+		final FileSystemView v = FileSystemView.getFileSystemView();
+		String name = v.getSystemDisplayName(f);
 
-            name = name.trim();
-            if (name.isEmpty()) {
-                name = null;
-            }
-        }
-        return name;
-    }
+		if (name != null) {
+			int idx = name.lastIndexOf('(');
+			if (idx != -1) {
+				name = name.substring(0, idx);
+			}
 
-    /**
-     * Returns the list of the removable devices actually connected to the computer. <br/>
-     * This method was effectively tested on:
-     * <ul>
-     * <li>Windows 7 (English)</li>
-     * </ul>
-     *
-     * @deprecated replaced by {@link #getWindowsRemovableDevicesCommand()}
-     *
-     * @return the list of removable devices
-     */
-//    @SuppressWarnings("unused")
-//    private ArrayList<USBStorageDevice> getWindowsRemovableDevicesList() {
-//
-//        /**
-//         * TODO: How to put this working in all languages?
-//         */
-//        String fileSystemDesc = "Removable Disk";
-//
-//        ArrayList<USBStorageDevice> listDevices = new ArrayList<USBStorageDevice>();
-//
-//        File[] roots = File.listRoots();
-//
-//        if (roots == null) {
-//            // TODO: raise an error?
-//            return listDevices;
-//        }
-//
-//        for (File root : roots) {
-//            if (root.canRead() && root.canWrite() && fsView.isDrive(root)
-//                    && !fsView.isFloppyDrive(root)) {
-//
-//                if (fileSystemDesc.equalsIgnoreCase(fsView
-//                        .getSystemTypeDescription(root))) {
-//                    USBStorageDevice device = new USBStorageDevice(root,
-//                            fsView.getSystemDisplayName(root));
-//                    listDevices.add(device);
-//                }
-//
-//                System.out.println(fsView.getSystemDisplayName(root) + " - "
-//                        + fsView.getSystemTypeDescription(root));
-//
-//                /*
-//                 * FileSystemView.getSystemTypeDescription();
-//                 * 
-//                 * Windows (8): Windows (7): "Removable Disk" Windows (XP):
-//                 * Linux (Ubuntu): OSX (10.7):
-//                 */
-//            }
-//        }
-//
-//        return listDevices;
-//    }
+			name = name.trim();
+			if (name.isEmpty()) {
+				name = null;
+			}
+		}
+		return name;
+	}
+
+	/**
+	 * Returns the list of the removable devices actually connected to the computer. <br/>
+	 * This method was effectively tested on:
+	 * <ul>
+	 * <li>Windows 7 (English)</li>
+	 * </ul>
+	 *
+	 * @deprecated replaced by {@link #getWindowsRemovableDevicesCommand()}
+	 *
+	 * @return the list of removable devices
+	 */
+	//    @SuppressWarnings("unused")
+	//    private ArrayList<USBStorageDevice> getWindowsRemovableDevicesList() {
+	//
+	//        /**
+	//         * TODO: How to put this working in all languages?
+	//         */
+	//        String fileSystemDesc = "Removable Disk";
+	//
+	//        ArrayList<USBStorageDevice> listDevices = new ArrayList<USBStorageDevice>();
+	//
+	//        File[] roots = File.listRoots();
+	//
+	//        if (roots == null) {
+	//            // TODO: raise an error?
+	//            return listDevices;
+	//        }
+	//
+	//        for (File root : roots) {
+	//            if (root.canRead() && root.canWrite() && fsView.isDrive(root)
+	//                    && !fsView.isFloppyDrive(root)) {
+	//
+	//                if (fileSystemDesc.equalsIgnoreCase(fsView
+	//                        .getSystemTypeDescription(root))) {
+	//                    USBStorageDevice device = new USBStorageDevice(root,
+	//                            fsView.getSystemDisplayName(root));
+	//                    listDevices.add(device);
+	//                }
+	//
+	//                System.out.println(fsView.getSystemDisplayName(root) + " - "
+	//                        + fsView.getSystemTypeDescription(root));
+	//
+	//                /*
+	//                 * FileSystemView.getSystemTypeDescription();
+	//                 * 
+	//                 * Windows (8): Windows (7): "Removable Disk" Windows (XP):
+	//                 * Linux (Ubuntu): OSX (10.7):
+	//                 */
+	//            }
+	//        }
+	//
+	//        return listDevices;
+	//    }
 }
