@@ -80,7 +80,7 @@ public class USBDeviceDetectorManager {
      *                        storage devices on the system.
      */
     public synchronized void setPollingInterval(final long pollingInterval) {
-        if (pollingInterval >= 0) {
+        if (pollingInterval <= 0) {
             throw new IllegalArgumentException("'pollingInterval' must be greater than 0");
         }
 
