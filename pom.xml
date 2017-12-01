@@ -3,7 +3,7 @@
 
     <groupId>net.samuelcampos</groupId>
     <artifactId>usbdrivedetector</artifactId>
-    <version>2.0.1-SNAPSHOT</version>
+    <version>2.0.1</version>
     <packaging>jar</packaging>
 
     <name>USB Drive Detector</name>
@@ -51,7 +51,7 @@
         <connection>scm:git:git://github.com/samuelcampos/usbdrivedetector.git</connection>
         <developerConnection>scm:git:git@github.com:samuelcampos/usbdrivedetector.git</developerConnection>
         <url>https://github.com/samuelcampos/usbdrivedetector/</url>
-      <tag>HEAD</tag>
+      <tag>usbdrivedetector-2.0.1</tag>
   </scm>
     
     <developers>
