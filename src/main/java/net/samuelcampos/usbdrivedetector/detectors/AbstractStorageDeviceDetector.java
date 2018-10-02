@@ -84,6 +84,12 @@ public abstract class AbstractStorageDeviceDetector {
     static USBStorageDevice getUSBDevice(final String rootPath, final String deviceName) {
         final File root = new File(rootPath);
 
+        if (!root.isDirectory()) {
+            // Sometimes commands returns an invalid directory
+            logger.trace("Invalid root found: {}", root);
+            return null;
+        }
+
         logger.trace("Device found: {}", root.getPath());
 
         try {

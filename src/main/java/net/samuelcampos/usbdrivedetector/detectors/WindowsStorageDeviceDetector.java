@@ -51,7 +51,10 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
             commandExecutor.processOutput(outputLine -> {
                 if (!outputLine.isEmpty() && !"DeviceID".equals(outputLine)) {
                     final String rootPath = outputLine + File.separatorChar;
-                    listDevices.add(getUSBDevice(rootPath, getDeviceName(rootPath)));
+                    USBStorageDevice device = getUSBDevice(rootPath, getDeviceName(rootPath));
+                    if (device != null) {
+                        listDevices.add(device);
+                    }
                 }
             });
 
