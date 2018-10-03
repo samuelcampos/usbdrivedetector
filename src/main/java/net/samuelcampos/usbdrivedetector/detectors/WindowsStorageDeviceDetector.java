@@ -34,10 +34,26 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
 
     private static final Logger logger = LoggerFactory.getLogger(WindowsStorageDeviceDetector.class);
 
+    private static final String WMIC_PATH_WIN8 = "wmic";
+    // Window 10 broke compatibility by removing the wbem dir from his PATH
+    private static final String WMIC_PATH_WIN10 = System.getenv("WINDIR") + "\\System32\\wbem\\wmic";
+
     /**
      * wmic logicaldisk where drivetype=2 get description,deviceid,volumename
      */
-    private static final String CMD_WMI_USB = "wmic logicaldisk where drivetype=2 get deviceid";
+    private static final String CMD_WMI_ARGS = "logicaldisk where drivetype=2 get deviceid";
+
+    private static final String CMD_WMI_USB;
+
+    static {
+        String wmicPath;
+        if (Float.parseFloat(System.getProperty("os.version")) >= 6.2) {
+            wmicPath = WMIC_PATH_WIN8;
+        } else {
+            wmicPath = WMIC_PATH_WIN10;
+        }
+        CMD_WMI_USB = wmicPath + " " + CMD_WMI_ARGS;
+    }
 
     protected WindowsStorageDeviceDetector() {
         super();
