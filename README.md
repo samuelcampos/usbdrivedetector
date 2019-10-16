@@ -16,6 +16,17 @@ To include this library in your project just use:
 </dependency>
 ```
 
+### Usage examples
+
+```java
+USBDeviceDetectorManager driveDetector = new USBDeviceDetectorManager();
+
+// Display all the USB storage devices currently connected
+driveDetector.getRemovableDevices().forEach(System.out::println);
+
+// Add an event listener to be notified when an USB storage device is connected or removed
+driveDetector.addDriveListener(System.out::println);
+```
 
 [travis-url]: https://travis-ci.org/samuelcampos/usbdrivedetector
 [travis-image]: https://travis-ci.org/samuelcampos/usbdrivedetector.svg?branch=master
