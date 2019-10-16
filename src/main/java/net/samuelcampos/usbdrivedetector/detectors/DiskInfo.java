@@ -16,6 +16,9 @@
 package net.samuelcampos.usbdrivedetector.detectors;
 
 
+import lombok.Data;
+
+@Data
 public class DiskInfo {
     private String device;
     private String mountPoint;
@@ -27,37 +30,5 @@ public class DiskInfo {
         this.mountPoint = "";
         this.name = "";
         this.isUSB = false;
-    }
-
-    public String getDevice() {
-        return device;
-    }
-
-    public void setDevice(String device) {
-        this.device = device;
-    }
-
-    public String getMountPoint() {
-        return mountPoint;
-    }
-
-    public void setMountPoint(String mountPoint) {
-        this.mountPoint = mountPoint;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public boolean isUSB() {
-        return isUSB;
-    }
-
-    public void setUSB(boolean USB) {
-        isUSB = USB;
     }
 }
