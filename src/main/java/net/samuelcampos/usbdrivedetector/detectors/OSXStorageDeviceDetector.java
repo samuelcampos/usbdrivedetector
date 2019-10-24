@@ -50,9 +50,8 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
     private static final String INFO_PROTOCOL = "Protocol";
     private static final String INFO_USB = "USB";
     private static final String INFO_NAME = "Volume Name";
+    private static final String INFO_UUID = "Volume UUID";
 
-    private static final int MACOS_SIERRA = 12;
-    private static final int MACOS_ELCAPITAN = 11;
     private static final int MACOSX_MOUNTAINLION = 8;
 
     private int macosVersion = -1;
@@ -90,7 +89,7 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
                     	final DiskInfo disk = getDiskInfo(device);
 
                     	if (disk.isUSB()) {
-                    		listDevices.add(new USBStorageDevice(new File(disk.getMountPoint()), disk.getName()));
+                    		listDevices.add(new USBStorageDevice(new File(disk.getMountPoint()), disk.getName(), disk.getDevice(), disk.getUUID()));
                     	}
                     }
 
@@ -140,6 +139,9 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
     				else if(INFO_NAME.equals(parts[0].trim())){
     					disk.setName(parts[1].trim());
     				}
+    				else if(INFO_UUID.equals(parts[0].trim())){
+					disk.setUUID(parts[1].trim());
+				}
     			}
 
 

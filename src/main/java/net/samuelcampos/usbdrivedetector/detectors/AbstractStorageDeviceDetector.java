@@ -82,6 +82,14 @@ public abstract class AbstractStorageDeviceDetector {
     }
 
     static USBStorageDevice getUSBDevice(final String rootPath, final String deviceName) {
+	return getUSBDevice(rootPath, deviceName, null);
+    }
+
+    static USBStorageDevice getUSBDevice(final String rootPath, final String deviceName, final String device) {
+	return getUSBDevice(rootPath, deviceName, device, null);
+    }
+
+    static USBStorageDevice getUSBDevice(final String rootPath, final String deviceName, final String device, final String uuid) {
         final File root = new File(rootPath);
 
         if (!root.isDirectory()) {
@@ -93,11 +101,12 @@ public abstract class AbstractStorageDeviceDetector {
         logger.trace("Device found: {}", root.getPath());
 
         try {
-            return new USBStorageDevice(root, deviceName);
+            return new USBStorageDevice(root, deviceName, device, uuid);
         } catch (IllegalArgumentException e) {
             logger.debug("Could not add Device: {}", e.getMessage(), e);
         }
 
         return null;
     }
+
 }

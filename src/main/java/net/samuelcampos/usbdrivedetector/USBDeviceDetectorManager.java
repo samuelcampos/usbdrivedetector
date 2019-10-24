@@ -15,18 +15,17 @@
  */
 package net.samuelcampos.usbdrivedetector;
 
-import net.samuelcampos.usbdrivedetector.detectors.AbstractStorageDeviceDetector;
-import net.samuelcampos.usbdrivedetector.events.DeviceEventType;
-import net.samuelcampos.usbdrivedetector.events.IUSBDriveListener;
-import net.samuelcampos.usbdrivedetector.events.USBStorageEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import net.samuelcampos.usbdrivedetector.detectors.AbstractStorageDeviceDetector;
+import net.samuelcampos.usbdrivedetector.events.DeviceEventType;
+import net.samuelcampos.usbdrivedetector.events.IUSBDriveListener;
+import net.samuelcampos.usbdrivedetector.events.USBStorageEvent;
 
 
 /**
@@ -158,6 +157,18 @@ public class USBDeviceDetectorManager {
     }
 
     /**
+     * Gets a set of currently connected USB storage devices.
+     * <p>
+     * This method has no effect on polling or listeners being updated
+     * </p>
+     *
+     * @return set of attached USB storage devices.
+     */
+    public Set<USBStorageDevice> getConnectedDevices() {
+	return this.connectedDevices;
+    }
+
+    /**
      * Gets a list of currently attached USB storage devices.
      * <p>
      * This method has no effect on polling or listeners being updated
@@ -204,7 +215,7 @@ public class USBDeviceDetectorManager {
 
     private void sendEventToListeners(final USBStorageEvent event) {
         /*
-         Make this thread safe, so we deal with a copy of listeners so any 
+         Make this thread safe, so we deal with a copy of listeners so any
          listeners being added or removed don't cause a ConcurrentModificationException.
          Also allows listeners to remove themselves while processing the event
          */
@@ -250,7 +261,9 @@ public class USBDeviceDetectorManager {
                     sleep(pollingInterval);
                 }
             } catch (InterruptedException ex) {
-                logger.error("Stopping polling thread", ex);
+            	if (!ex.getMessage().equalsIgnoreCase("sleep interrupted")) {
+                    logger.error("Stopping polling thread", ex);
+            	}
             }
         }
 

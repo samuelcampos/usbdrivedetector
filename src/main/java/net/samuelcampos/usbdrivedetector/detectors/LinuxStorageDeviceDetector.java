@@ -15,17 +15,16 @@
  */
 package net.samuelcampos.usbdrivedetector.detectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import net.samuelcampos.usbdrivedetector.USBStorageDevice;
-import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import net.samuelcampos.usbdrivedetector.USBStorageDevice;
+import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
 
 /**
  * Tested on Linux Ubuntu 13.10
@@ -40,11 +39,11 @@ public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
     private static final Pattern command1Pattern = Pattern.compile("^(\\/[^ ]+)[^%]+%[ ]+(.+)$");
 
     private static final String CMD_CHECK_USB = "udevadm info -q property -n ";
-    private static final String strDeviceVerifier = "ID_USB_DRIVER=usb-storage";
 
     private static final String INFO_BUS = "ID_BUS";
     private static final String INFO_USB = "usb";
     private static final String INFO_NAME = "ID_FS_LABEL";
+    private static final String INFO_UUID = "ID_FS_UUID";
 
     private static final String DISK_PREFIX = "/dev/";
 
@@ -69,6 +68,9 @@ public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
                     }
                     else if(INFO_NAME.equals(parts[0].trim())){
                         disk.setName(parts[1].trim());
+                    }
+                    else if(INFO_UUID.equals(parts[0].trim())){
+                        disk.setUUID(parts[1].trim());
                     }
                 }
 
@@ -103,7 +105,7 @@ public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
                         readDiskInfo(disk);
 
                         if(disk.isUSB()){
-                            listDevices.add(new USBStorageDevice(new File(disk.getMountPoint()), disk.getName()));
+                            listDevices.add(new USBStorageDevice(new File(disk.getMountPoint()), disk.getName(), disk.getDevice(), disk.getUUID()));
                         }
                     }
                 }
