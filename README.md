@@ -6,7 +6,7 @@
 A Java library to get a list of all usb storage devices connected to the computer. It works on the three main operating systems (Windows, Linux and OS X).
 
 ### Maven dependency
-
+ever
 To include this library in your project just use:
 ```xml
 <dependency>
@@ -31,6 +31,5 @@ driveDetector.addDriveListener(System.out::println);
 [travis-url]: https://travis-ci.org/samuelcampos/usbdrivedetector
 [travis-image]: https://travis-ci.org/samuelcampos/usbdrivedetector.svg?branch=master
 
-[maven-url]: https://search.maven.org/#artifactdetails%7Cnet.samuelcampos%7Cusbdrivedetector%7C2.0.4%7C
+[maven-url]: https://search.maven.org/artifact/net.samuelcampos/usbdrivedetector/
 [maven-version]: https://img.shields.io/maven-central/v/net.samuelcampos/usbdrivedetector.svg?style=flat
-
