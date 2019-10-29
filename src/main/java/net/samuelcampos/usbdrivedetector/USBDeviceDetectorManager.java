@@ -32,9 +32,9 @@ import java.util.*;
 public class USBDeviceDetectorManager {
 
     /**
-     * The default polling interval is 10 seconds
+     * The default polling interval is 5 seconds
      */
-    private static final long DEFAULT_POLLING_INTERVAL = 10000;
+    private static final long DEFAULT_POLLING_INTERVAL = 5000;
 
     private long currentPollingInterval = DEFAULT_POLLING_INTERVAL;
 

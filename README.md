@@ -6,8 +6,9 @@
 A Java library to get a list of all usb storage devices connected to the computer and has the capability of unmount them. It works on the three main operating systems (Windows, Linux and OS X).
 
 ### Maven dependency
-ever
+
 To include this library in your project just use:
+
 ```xml
 <dependency>
     <groupId>net.samuelcampos</groupId>

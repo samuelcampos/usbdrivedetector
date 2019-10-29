@@ -18,8 +18,8 @@ package net.samuelcampos.usbdrivedetector.detectors;
 import lombok.extern.slf4j.Slf4j;
 import net.samuelcampos.usbdrivedetector.USBStorageDevice;
 import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
+import net.samuelcampos.usbdrivedetector.utils.OSUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +57,7 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
     protected OSXStorageDeviceDetector() {
         super();
 
-        final String version = System.getProperty("os.version");
+        final String version = OSUtils.getOsVersion();
         final String[] versionParts = version.split("\\.");
 
         if (versionParts.length > 1) {
@@ -87,7 +87,8 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
                     	final DiskInfo disk = getDiskInfo(device);
 
                     	if (disk.isUSB()) {
-                    		listDevices.add(new USBStorageDevice(new File(disk.getMountPoint()), disk.getName(), disk.getDevice(), disk.getUuid()));
+							getUSBDevice(disk.getMountPoint(), disk.getName(), disk.getDevice(), disk.getUuid())
+									.ifPresent(listDevices::add);
                     	}
                     }
 
@@ -103,7 +104,8 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
         			final Matcher matcher = macOSXPattern_MOUNT.matcher(outputLine);
 
         			if (matcher.matches()) {
-        				listDevices.add(getUSBDevice(matcher.group(1)));
+						getUSBDevice(matcher.group(1))
+								.ifPresent(listDevices::add);
         			}
         		});
 
@@ -128,18 +130,23 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
     			final String[] parts = outputLine.split(":");
 
     			if(parts.length > 1){
-    				if(INFO_MOUNTPOINT.equals(parts[0].trim())){
-    					disk.setMountPoint(parts[1].trim());
-    				}
-    				else if(INFO_PROTOCOL.equals(parts[0].trim())){
-    					disk.setUSB(INFO_USB.equals(parts[1].trim()));
-    				}
-    				else if(INFO_NAME.equals(parts[0].trim())){
-    					disk.setName(parts[1].trim());
-    				}
-    				else if(INFO_UUID.equals(parts[0].trim())){
-					disk.setUuid(parts[1].trim());
-				}
+					switch (parts[0].trim()) {
+						case INFO_MOUNTPOINT:
+							disk.setMountPoint(parts[1].trim());
+							break;
+
+						case INFO_PROTOCOL:
+							disk.setUSB(INFO_USB.equals(parts[1].trim()));
+							break;
+
+						case INFO_NAME:
+							disk.setName(parts[1].trim());
+							break;
+
+						case INFO_UUID:
+							disk.setUuid(parts[1].trim());
+							break;
+					}
     			}
 
 

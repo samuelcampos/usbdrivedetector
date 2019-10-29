@@ -21,7 +21,7 @@ public class SimpleTest implements IUSBDriveListener{
         driveDetector.addDriveListener(sTest);
 
         try {
-            Thread.sleep(10000);
+            Thread.sleep(20000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -29,7 +29,7 @@ public class SimpleTest implements IUSBDriveListener{
         driveDetector.unmountStorageDevice(driveDetector.getRemovableDevices().get(0));
 
         try {
-            Thread.sleep(60000);
+            Thread.sleep(20000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

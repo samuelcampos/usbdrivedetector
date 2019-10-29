@@ -18,6 +18,7 @@ package net.samuelcampos.usbdrivedetector.detectors;
 import lombok.extern.slf4j.Slf4j;
 import net.samuelcampos.usbdrivedetector.USBStorageDevice;
 import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
+import net.samuelcampos.usbdrivedetector.utils.OSUtils;
 
 import javax.swing.filechooser.FileSystemView;
 import java.io.File;
@@ -44,7 +45,7 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
 
     static {
         String wmicPath;
-        if (Float.parseFloat(System.getProperty("os.version")) >= 6.2) {
+        if (Float.parseFloat(OSUtils.getOsVersion()) >= 6.2) {
             wmicPath = WMIC_PATH_WIN8;
         } else {
             wmicPath = WMIC_PATH_WIN10;
@@ -68,10 +69,9 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
                 if(parts.length > 1 && !parts[0].isEmpty() && !parts[0].equals("DeviceID") && !parts[0].equals(parts[parts.length - 1])) {
                 	final String rootPath = parts[0] + File.separatorChar;
                     final String uuid = parts[parts.length - 1];
-                    USBStorageDevice device = getUSBDevice(rootPath, getDeviceName(rootPath), rootPath, uuid);
-                    if (device != null) {
-                        listDevices.add(device);
-                    }
+
+                    getUSBDevice(rootPath, getDeviceName(rootPath), rootPath, uuid)
+                            .ifPresent(listDevices::add);
                 }
             });
 
@@ -100,58 +100,4 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
         }
         return name;
     }
-
-    /**
-     * Returns the list of the removable devices actually connected to the computer. <br/>
-     * This method was effectively tested on:
-     * <ul>
-     * <li>Windows 7 (English)</li>
-     * </ul>
-     *
-     * @deprecated replaced by {@link #getWindowsRemovableDevicesCommand()}
-     *
-     * @return the list of removable devices
-     */
-//    @SuppressWarnings("unused")
-//    private ArrayList<USBStorageDevice> getWindowsRemovableDevicesList() {
-//
-//        /**
-//         * TODO: How to put this working in all languages?
-//         */
-//        String fileSystemDesc = "Removable Disk";
-//
-//        ArrayList<USBStorageDevice> listDevices = new ArrayList<USBStorageDevice>();
-//
-//        File[] roots = File.listRoots();
-//
-//        if (roots == null) {
-//            // TODO: raise an error?
-//            return listDevices;
-//        }
-//
-//        for (File root : roots) {
-//            if (root.canRead() && root.canWrite() && fsView.isDrive(root)
-//                    && !fsView.isFloppyDrive(root)) {
-//
-//                if (fileSystemDesc.equalsIgnoreCase(fsView
-//                        .getSystemTypeDescription(root))) {
-//                    USBStorageDevice device = new USBStorageDevice(root,
-//                            fsView.getSystemDisplayName(root));
-//                    listDevices.add(device);
-//                }
-//
-//                System.out.println(fsView.getSystemDisplayName(root) + " - "
-//                        + fsView.getSystemTypeDescription(root));
-//
-//                /*
-//                 * FileSystemView.getSystemTypeDescription();
-//                 *
-//                 * Windows (8): Windows (7): "Removable Disk" Windows (XP):
-//                 * Linux (Ubuntu): OSX (10.7):
-//                 */
-//            }
-//        }
-//
-//        return listDevices;
-//    }
 }

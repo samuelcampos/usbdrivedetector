@@ -15,14 +15,13 @@
  */
 package net.samuelcampos.usbdrivedetector.detectors;
 
-//import com.sun.deploy.config.OSType;
 import lombok.extern.slf4j.Slf4j;
 import net.samuelcampos.usbdrivedetector.USBStorageDevice;
-import net.samuelcampos.usbdrivedetector.utils.OSType;
 import net.samuelcampos.usbdrivedetector.utils.OSUtils;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This class is prepared to:
@@ -44,7 +43,7 @@ public abstract class AbstractStorageDeviceDetector {
 
     public static synchronized AbstractStorageDeviceDetector getInstance() {
         if (instance == null) {
-            switch (OSType.getOSType(OSUtils.OS_NAME)) {
+            switch (OSUtils.getOsType()) {
                 case WINDOWS:
                     instance = new WindowsStorageDeviceDetector();
                     break;
@@ -72,36 +71,28 @@ public abstract class AbstractStorageDeviceDetector {
      */
     public abstract List<USBStorageDevice> getStorageDevicesDevices();
 
-    static USBStorageDevice getUSBDevice(final String rootPath) {
-        return getUSBDevice(rootPath, null);
+    static Optional<USBStorageDevice> getUSBDevice(final String rootPath) {
+        return getUSBDevice(rootPath, null, null, null);
     }
 
-    static USBStorageDevice getUSBDevice(final String rootPath, final String deviceName) {
-	    return getUSBDevice(rootPath, deviceName, null);
-    }
-
-    static USBStorageDevice getUSBDevice(final String rootPath, final String deviceName, final String device) {
-	    return getUSBDevice(rootPath, deviceName, device, null);
-    }
-
-    static USBStorageDevice getUSBDevice(final String rootPath, final String deviceName, final String device, final String uuid) {
+    static Optional<USBStorageDevice> getUSBDevice(final String rootPath, final String deviceName, final String device, final String uuid) {
         final File root = new File(rootPath);
 
         if (!root.isDirectory()) {
-            // Sometimes commands returns an invalid directory
+            // When a device has recently disconnected, the command may still return the old root directory of the recently removed device
             log.trace("Invalid root found: {}", root);
-            return null;
+            return Optional.empty();
         }
 
         log.trace("Device found: {}", root.getPath());
 
         try {
-            return new USBStorageDevice(root, deviceName, device, uuid);
+            return Optional.of(new USBStorageDevice(root, deviceName, device, uuid));
         } catch (IllegalArgumentException e) {
             log.debug("Could not add Device: {}", e.getMessage(), e);
         }
 
-        return null;
+        return Optional.empty();
     }
 
 }

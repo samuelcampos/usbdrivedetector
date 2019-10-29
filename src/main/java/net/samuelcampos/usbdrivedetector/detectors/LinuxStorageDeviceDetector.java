@@ -15,18 +15,15 @@
  */
 package net.samuelcampos.usbdrivedetector.detectors;
 
-import java.io.File;
+import lombok.extern.slf4j.Slf4j;
+import net.samuelcampos.usbdrivedetector.USBStorageDevice;
+import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import net.samuelcampos.usbdrivedetector.USBStorageDevice;
-import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
 
 /**
  * Tested on Linux Ubuntu 13.10
@@ -51,7 +48,6 @@ public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
     protected LinuxStorageDeviceDetector() {
         super();
     }
-
 
     private void readDiskInfo(final DiskInfo disk) {
 
@@ -108,7 +104,8 @@ public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
                         readDiskInfo(disk);
 
                         if(disk.isUSB()){
-                            listDevices.add(new USBStorageDevice(new File(disk.getMountPoint()), disk.getName(), disk.getDevice(), disk.getUuid()));
+                            getUSBDevice(disk.getMountPoint(), disk.getName(), disk.getDevice(), disk.getUuid())
+                                    .ifPresent(listDevices::add);
                         }
                     }
                 }
