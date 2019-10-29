@@ -4,8 +4,9 @@ jdk:
   - openjdk8
 
 before_install:
-  - echo $GPG_SECRET_KEYS | base64 --decode | gpg --import
-  - echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust
+  - export GPG_TTY=$(tty)
+  - echo $GPG_SECRET_KEYS | base64 --decode | gpg2 --batch --import
+  - echo $GPG_OWNERTRUST | base64 --decode | gpg2 --batch --import-ownertrust
 
 install: mvn -B install -U -DskipTests=true
 

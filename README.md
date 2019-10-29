@@ -26,6 +26,9 @@ driveDetector.getRemovableDevices().forEach(System.out::println);
 
 // Add an event listener to be notified when an USB storage device is connected or removed
 driveDetector.addDriveListener(System.out::println);
+
+// Unmount a device
+driveDetector.unmountStorageDevice(driveDetector.getRemovableDevices().get(0));
 ```
 
 [travis-url]: https://travis-ci.org/samuelcampos/usbdrivedetector
