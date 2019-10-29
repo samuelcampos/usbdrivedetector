@@ -15,9 +15,11 @@
  */
 package net.samuelcampos.usbdrivedetector.detectors;
 
+//import com.sun.deploy.config.OSType;
+import lombok.extern.slf4j.Slf4j;
 import net.samuelcampos.usbdrivedetector.USBStorageDevice;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import net.samuelcampos.usbdrivedetector.utils.OSType;
+import net.samuelcampos.usbdrivedetector.utils.OSUtils;
 
 import java.io.File;
 import java.util.List;
@@ -31,37 +33,30 @@ import java.util.List;
  *
  * @author samuelcampos
  */
+@Slf4j
 public abstract class AbstractStorageDeviceDetector {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(AbstractStorageDeviceDetector.class);
-
-    private static final String OSName = System.getProperty("os.name")
-            .toLowerCase();
-
-    // private static final String OSVersion = System.getProperty("os.version");
-    // private static final String OSArch = System.getProperty("os.arch");
     /**
      * {@link AbstractStorageDeviceDetector} instance. <br/>
      * This instance is created (Thread-Safe) when the JVM loads the class.
      */
-    private static final AbstractStorageDeviceDetector instance;
+    private static AbstractStorageDeviceDetector instance;
 
-    static {
-        if (OSName.startsWith("win")) {
-            instance = new WindowsStorageDeviceDetector();
-        } else if (OSName.startsWith("linux")) {
-            instance = new LinuxStorageDeviceDetector();
-        } else if (OSName.startsWith("mac")) {
-            instance = new OSXStorageDeviceDetector();
-        } else {
-            instance = null;
-        }
-    }
-
-    public static AbstractStorageDeviceDetector getInstance() {
+    public static synchronized AbstractStorageDeviceDetector getInstance() {
         if (instance == null) {
-            throw new UnsupportedOperationException("Your Operative System (" + OSName + ") is not supported!");
+            switch (OSType.getOSType(OSUtils.OS_NAME)) {
+                case WINDOWS:
+                    instance = new WindowsStorageDeviceDetector();
+                    break;
+
+                case LINUX:
+                    instance = new LinuxStorageDeviceDetector();
+                    break;
+
+                case MAC_OS:
+                    instance = new OSXStorageDeviceDetector();
+                    break;
+            }
         }
 
         return instance;
@@ -82,22 +77,31 @@ public abstract class AbstractStorageDeviceDetector {
     }
 
     static USBStorageDevice getUSBDevice(final String rootPath, final String deviceName) {
+	    return getUSBDevice(rootPath, deviceName, null);
+    }
+
+    static USBStorageDevice getUSBDevice(final String rootPath, final String deviceName, final String device) {
+	    return getUSBDevice(rootPath, deviceName, device, null);
+    }
+
+    static USBStorageDevice getUSBDevice(final String rootPath, final String deviceName, final String device, final String uuid) {
         final File root = new File(rootPath);
 
         if (!root.isDirectory()) {
             // Sometimes commands returns an invalid directory
-            logger.trace("Invalid root found: {}", root);
+            log.trace("Invalid root found: {}", root);
             return null;
         }
 
-        logger.trace("Device found: {}", root.getPath());
+        log.trace("Device found: {}", root.getPath());
 
         try {
-            return new USBStorageDevice(root, deviceName);
+            return new USBStorageDevice(root, deviceName, device, uuid);
         } catch (IllegalArgumentException e) {
-            logger.debug("Could not add Device: {}", e.getMessage(), e);
+            log.debug("Could not add Device: {}", e.getMessage(), e);
         }
 
         return null;
     }
+
 }

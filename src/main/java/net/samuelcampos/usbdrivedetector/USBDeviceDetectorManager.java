@@ -15,27 +15,21 @@
  */
 package net.samuelcampos.usbdrivedetector;
 
+import lombok.extern.slf4j.Slf4j;
 import net.samuelcampos.usbdrivedetector.detectors.AbstractStorageDeviceDetector;
 import net.samuelcampos.usbdrivedetector.events.DeviceEventType;
 import net.samuelcampos.usbdrivedetector.events.IUSBDriveListener;
 import net.samuelcampos.usbdrivedetector.events.USBStorageEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import net.samuelcampos.usbdrivedetector.unmounters.AbstractStorageDeviceUnmounter;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @author samuelcampos
  */
+@Slf4j
 public class USBDeviceDetectorManager {
-
-    private static final Logger logger = LoggerFactory
-            .getLogger(USBDeviceDetectorManager.class);
 
     /**
      * The default polling interval is 10 seconds
@@ -169,6 +163,10 @@ public class USBDeviceDetectorManager {
         return AbstractStorageDeviceDetector.getInstance().getStorageDevicesDevices();
     }
 
+    public void unmountStorageDevice(USBStorageDevice usbStorageDevice) throws IOException {
+        AbstractStorageDeviceUnmounter.getInstance().unmount(usbStorageDevice);
+    }
+
     /**
      * Updates the internal state of this manager and sends
      *
@@ -204,7 +202,7 @@ public class USBDeviceDetectorManager {
 
     private void sendEventToListeners(final USBStorageEvent event) {
         /*
-         Make this thread safe, so we deal with a copy of listeners so any 
+         Make this thread safe, so we deal with a copy of listeners so any
          listeners being added or removed don't cause a ConcurrentModificationException.
          Also allows listeners to remove themselves while processing the event
          */
@@ -217,7 +215,7 @@ public class USBDeviceDetectorManager {
             try {
                 listener.usbDriveEvent(event);
             } catch (Exception ex) {
-                logger.error("An IUSBDriveListener threw an exception", ex);
+                log.error("An IUSBDriveListener threw an exception", ex);
             }
         }
     }
@@ -237,20 +235,22 @@ public class USBDeviceDetectorManager {
             try {
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
-                        logger.trace("Polling refresh task is running");
+                        log.trace("Polling refresh task is running");
 
-                        List<USBStorageDevice> actualConnectedDevices = AbstractStorageDeviceDetector.getInstance().getStorageDevicesDevices();
+                        List<USBStorageDevice> actualConnectedDevices = getRemovableDevices();
 
                         updateConnectedDevices(actualConnectedDevices);
 
                     } catch (Exception e) {
-                        logger.error("Error while refreshing device list", e);
+                        log.error("Error while refreshing device list", e);
                     }
 
                     sleep(pollingInterval);
                 }
             } catch (InterruptedException ex) {
-                logger.error("Stopping polling thread", ex);
+            	if (!ex.getMessage().equalsIgnoreCase("sleep interrupted")) {
+                    log.error("Stopping polling thread", ex);
+            	}
             }
         }
 

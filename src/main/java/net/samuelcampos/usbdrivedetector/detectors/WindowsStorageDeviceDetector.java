@@ -15,10 +15,9 @@
  */
 package net.samuelcampos.usbdrivedetector.detectors;
 
+import lombok.extern.slf4j.Slf4j;
 import net.samuelcampos.usbdrivedetector.USBStorageDevice;
 import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.filechooser.FileSystemView;
 import java.io.File;
@@ -30,9 +29,8 @@ import java.util.List;
  *
  * @author samuelcampos
  */
+@Slf4j
 public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector {
-
-    private static final Logger logger = LoggerFactory.getLogger(WindowsStorageDeviceDetector.class);
 
     private static final String WMIC_PATH_WIN8 = "wmic";
     // Window 10 broke compatibility by removing the wbem dir from his PATH
@@ -41,8 +39,7 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
     /**
      * wmic logicaldisk where drivetype=2 get description,deviceid,volumename
      */
-    private static final String CMD_WMI_ARGS = "logicaldisk where drivetype=2 get deviceid";
-
+    private static final String CMD_WMI_ARGS = "logicaldisk where drivetype=2 get deviceid, VolumeSerialNumber";
     private static final String CMD_WMI_USB;
 
     static {
@@ -65,9 +62,13 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
 
         try (CommandExecutor commandExecutor = new CommandExecutor(CMD_WMI_USB)) {
             commandExecutor.processOutput(outputLine -> {
-                if (!outputLine.isEmpty() && !"DeviceID".equals(outputLine)) {
-                    final String rootPath = outputLine + File.separatorChar;
-                    USBStorageDevice device = getUSBDevice(rootPath, getDeviceName(rootPath));
+
+        	final String[] parts = outputLine.split(" ");
+
+                if(parts.length > 1 && !parts[0].isEmpty() && !parts[0].equals("DeviceID") && !parts[0].equals(parts[parts.length - 1])) {
+                	final String rootPath = parts[0] + File.separatorChar;
+                    final String uuid = parts[parts.length - 1];
+                    USBStorageDevice device = getUSBDevice(rootPath, getDeviceName(rootPath), rootPath, uuid);
                     if (device != null) {
                         listDevices.add(device);
                     }
@@ -75,7 +76,7 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
             });
 
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 
         return listDevices;
@@ -144,7 +145,7 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
 //
 //                /*
 //                 * FileSystemView.getSystemTypeDescription();
-//                 * 
+//                 *
 //                 * Windows (8): Windows (7): "Removable Disk" Windows (XP):
 //                 * Linux (Ubuntu): OSX (10.7):
 //                 */

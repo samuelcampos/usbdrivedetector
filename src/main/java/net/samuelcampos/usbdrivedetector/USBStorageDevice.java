@@ -1,12 +1,9 @@
 /*
  * Copyright 2014 samuelcampos.
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,23 +31,22 @@ import javax.swing.filechooser.FileSystemView;
 public class USBStorageDevice {
     private final File rootDirectory;
     private final String deviceName;
+    private final String device;
+    private final String uuid;
 
-    public USBStorageDevice(final File rootDirectory, String deviceName){
-        if(rootDirectory == null || !rootDirectory.isDirectory()){
+    public USBStorageDevice(final File rootDirectory, String deviceName, final String device, final String uuid) {
+        if (rootDirectory == null || !rootDirectory.isDirectory()) {
             throw new IllegalArgumentException("Invalid root file!");
         }
 
         this.rootDirectory = rootDirectory;
 
-        if(deviceName == null || deviceName.isEmpty()) {
+        if (deviceName == null || deviceName.isEmpty()) {
             deviceName = rootDirectory.getName();
         }
-
+        this.device = device;
         this.deviceName = deviceName;
-    }
-
-    public USBStorageDevice(final File rootDirectory){
-        this(rootDirectory, null);
+        this.uuid = uuid;
     }
 
     /**
@@ -61,7 +57,7 @@ public class USBStorageDevice {
      * @return <b>true</b> if it is possible to perform read operations in this device, <b>false</b> otherwise.
      */
     public boolean canRead() {
-        return rootDirectory.canRead();
+	    return rootDirectory.canRead();
     }
 
     /**
@@ -72,7 +68,7 @@ public class USBStorageDevice {
      * @return <b>true</b> if it is possible to perform write operations in this device, <b>false</b> otherwise.
      */
     public boolean canWrite() {
-        return rootDirectory.canWrite();
+	    return rootDirectory.canWrite();
     }
 
     /**
@@ -83,7 +79,7 @@ public class USBStorageDevice {
      * @return <b>true</b> if it is possible to perform execute operations in this device, <b>false</b> otherwise.
      */
     public boolean canExecute() {
-        return rootDirectory.canExecute();
+	    return rootDirectory.canExecute();
     }
 
     /**
@@ -92,7 +88,6 @@ public class USBStorageDevice {
      * @return the name of the root of this device as it would be displayed in a system file browser.
      */
     public String getSystemDisplayName() {
-        return FileSystemView.getFileSystemView().getSystemDisplayName(rootDirectory);
+	    return FileSystemView.getFileSystemView().getSystemDisplayName(rootDirectory);
     }
 }
-
