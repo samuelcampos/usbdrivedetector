@@ -15,10 +15,9 @@
  */
 package net.samuelcampos.usbdrivedetector.detectors;
 
+import lombok.extern.slf4j.Slf4j;
 import net.samuelcampos.usbdrivedetector.USBStorageDevice;
 import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.filechooser.FileSystemView;
 import java.io.File;
@@ -30,9 +29,8 @@ import java.util.List;
  *
  * @author samuelcampos
  */
+@Slf4j
 public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector {
-
-    private static final Logger logger = LoggerFactory.getLogger(WindowsStorageDeviceDetector.class);
 
     private static final String WMIC_PATH_WIN8 = "wmic";
     // Window 10 broke compatibility by removing the wbem dir from his PATH
@@ -78,7 +76,7 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
             });
 
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 
         return listDevices;

@@ -12,7 +12,7 @@ To include this library in your project just use:
 <dependency>
     <groupId>net.samuelcampos</groupId>
     <artifactId>usbdrivedetector</artifactId>
-    <version>2.0.5</version>
+    <version>2.1.0</version>
 </dependency>
 ```
 
@@ -31,6 +31,5 @@ driveDetector.addDriveListener(System.out::println);
 [travis-url]: https://travis-ci.org/samuelcampos/usbdrivedetector
 [travis-image]: https://travis-ci.org/samuelcampos/usbdrivedetector.svg?branch=master
 
-[maven-url]: https://search.maven.org/#artifactdetails%7Cnet.samuelcampos%7Cusbdrivedetector%7C2.0.4%7C
+[maven-url]: https://search.maven.org/artifact/net.samuelcampos/usbdrivedetector/
 [maven-version]: https://img.shields.io/maven-central/v/net.samuelcampos/usbdrivedetector.svg?style=flat
-

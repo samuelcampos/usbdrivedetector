@@ -15,10 +15,9 @@
  */
 package net.samuelcampos.usbdrivedetector.detectors;
 
+import lombok.extern.slf4j.Slf4j;
 import net.samuelcampos.usbdrivedetector.USBStorageDevice;
 import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,9 +30,8 @@ import java.util.regex.Pattern;
  *
  * @author samuelcampos
  */
+@Slf4j
 public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
-
-    private static final Logger logger = LoggerFactory.getLogger(OSXStorageDeviceDetector.class);
 
     /**
      * system_profiler SPUSBDataType | grep "BSD Name:\|Mount Point:"
@@ -67,7 +65,7 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
         		macosVersion = Integer.parseInt(versionParts[1]);
         	}
         	catch (NumberFormatException nfe) {
-        		logger.error(nfe.getMessage(), nfe);
+        		log.error(nfe.getMessage(), nfe);
         	}
         }
 
@@ -89,14 +87,14 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
                     	final DiskInfo disk = getDiskInfo(device);
 
                     	if (disk.isUSB()) {
-                    		listDevices.add(new USBStorageDevice(new File(disk.getMountPoint()), disk.getName(), disk.getDevice(), disk.getUUID()));
+                    		listDevices.add(new USBStorageDevice(new File(disk.getMountPoint()), disk.getName(), disk.getDevice(), disk.getUuid()));
                     	}
                     }
 
         		});
 
         	} catch (IOException e) {
-        		logger.error(e.getMessage(), e);
+        		log.error(e.getMessage(), e);
         	}
         }
         else{
@@ -110,7 +108,7 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
         		});
 
         	} catch (IOException e) {
-        		logger.error(e.getMessage(), e);
+        		log.error(e.getMessage(), e);
         	}
         }
 
@@ -140,7 +138,7 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
     					disk.setName(parts[1].trim());
     				}
     				else if(INFO_UUID.equals(parts[0].trim())){
-					disk.setUUID(parts[1].trim());
+					disk.setUuid(parts[1].trim());
 				}
     			}
 
@@ -148,7 +146,7 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
     		});
 
     	} catch (IOException e) {
-    		logger.error(e.getMessage(), e);
+    		log.error(e.getMessage(), e);
     	}
 
 		return disk;

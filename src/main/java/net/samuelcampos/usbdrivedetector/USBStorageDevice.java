@@ -13,6 +13,10 @@
 
 package net.samuelcampos.usbdrivedetector;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
 import java.io.File;
 import javax.swing.filechooser.FileSystemView;
 
@@ -21,6 +25,9 @@ import javax.swing.filechooser.FileSystemView;
  *
  * @author samuelcampos
  */
+@Getter
+@ToString
+@EqualsAndHashCode
 public class USBStorageDevice {
     private final File rootDirectory;
     private final String deviceName;
@@ -28,38 +35,18 @@ public class USBStorageDevice {
     private final String uuid;
 
     public USBStorageDevice(final File rootDirectory, String deviceName, final String device, final String uuid) {
-	if (rootDirectory == null || !rootDirectory.isDirectory()) {
-	    throw new IllegalArgumentException("Invalid root file!");
-	}
+        if (rootDirectory == null || !rootDirectory.isDirectory()) {
+            throw new IllegalArgumentException("Invalid root file!");
+        }
 
-	this.rootDirectory = rootDirectory;
+        this.rootDirectory = rootDirectory;
 
-	if (deviceName == null || deviceName.isEmpty()) {
-	    deviceName = rootDirectory.getName();
-	}
-	this.device = device;
-	this.deviceName = deviceName;
-	this.uuid = uuid;
-    }
-
-    public String getUUID() {
-	return uuid;
-    }
-
-    public File getRootDirectory() {
-	return rootDirectory;
-    }
-
-    public String getDevice() {
-	return device;
-    }
-
-    /**
-     *
-     * @return the name of the USB storage device
-     */
-    public String getDeviceName() {
-	return deviceName;
+        if (deviceName == null || deviceName.isEmpty()) {
+            deviceName = rootDirectory.getName();
+        }
+        this.device = device;
+        this.deviceName = deviceName;
+        this.uuid = uuid;
     }
 
     /**
@@ -70,7 +57,7 @@ public class USBStorageDevice {
      * @return <b>true</b> if it is possible to perform read operations in this device, <b>false</b> otherwise.
      */
     public boolean canRead() {
-	return rootDirectory.canRead();
+	    return rootDirectory.canRead();
     }
 
     /**
@@ -81,7 +68,7 @@ public class USBStorageDevice {
      * @return <b>true</b> if it is possible to perform write operations in this device, <b>false</b> otherwise.
      */
     public boolean canWrite() {
-	return rootDirectory.canWrite();
+	    return rootDirectory.canWrite();
     }
 
     /**
@@ -92,7 +79,7 @@ public class USBStorageDevice {
      * @return <b>true</b> if it is possible to perform execute operations in this device, <b>false</b> otherwise.
      */
     public boolean canExecute() {
-	return rootDirectory.canExecute();
+	    return rootDirectory.canExecute();
     }
 
     /**
@@ -101,33 +88,6 @@ public class USBStorageDevice {
      * @return the name of the root of this device as it would be displayed in a system file browser.
      */
     public String getSystemDisplayName() {
-	return FileSystemView.getFileSystemView().getSystemDisplayName(rootDirectory);
-    }
-
-    @Override
-    public int hashCode() {
-	int hash = 7;
-	hash = 89 * hash + (this.rootDirectory != null ? this.rootDirectory.hashCode() : 0);
-	hash = 89 * hash + (this.deviceName != null ? this.deviceName.hashCode() : 0);
-	hash = 89 * hash + (this.device != null ? this.device.hashCode() : 0);
-	hash = 89 * hash + (this.uuid != null ? this.uuid.hashCode() : 0);
-	return hash;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-	if (obj == null) {
-	    return false;
-	}
-	if (getClass() != obj.getClass()) {
-	    return false;
-	}
-	final USBStorageDevice other = (USBStorageDevice) obj;
-	return this.rootDirectory == other.rootDirectory || (this.rootDirectory != null && this.rootDirectory.equals(other.rootDirectory));
-    }
-
-    @Override
-    public String toString() {
-	return "RemovableDevice [Root=" + rootDirectory + ", Device Name=" + deviceName + ", Device=" + device + ", UUID=" + uuid + "]";
+	    return FileSystemView.getFileSystemView().getSystemDisplayName(rootDirectory);
     }
 }

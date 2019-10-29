@@ -13,40 +13,36 @@
 package net.samuelcampos.usbdrivedetector.unmounters;
 
 import java.io.IOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import net.samuelcampos.usbdrivedetector.USBStorageDevice;
+import net.samuelcampos.usbdrivedetector.utils.OSType;
+import net.samuelcampos.usbdrivedetector.utils.OSUtils;
 
 public abstract class AbstractStorageDeviceUnmounter {
-
-    private static final String OSName = System.getProperty("os.name").toLowerCase();
-
-    protected static final Logger logger = LoggerFactory.getLogger(AbstractStorageDeviceUnmounter.class);
 
     /**
      * {@link AbstractStorageDeviceUnmounter} instance. <br/>
      * This instance is created (Thread-Safe) when the JVM loads the class.
      */
-    private static final AbstractStorageDeviceUnmounter instance;
+    private static AbstractStorageDeviceUnmounter instance;
 
-    static {
-	if (OSName.startsWith("win")) {
-	    instance = new WindowsStorageDeviceUnmounter();
-	} else if (OSName.startsWith("linux")) {
-	    instance = new LinuxStorageDeviceUnmounter();
-	} else if (OSName.startsWith("mac")) {
-	    instance = new OSXStorageDeviceUnmounter();
-	} else {
-	    instance = null;
-	}
-    }
+    public static synchronized AbstractStorageDeviceUnmounter getInstance() {
+		if (instance == null) {
+			switch (OSType.getOSType(OSUtils.OS_NAME)) {
+				case WINDOWS:
+					instance = new WindowsStorageDeviceUnmounter();
+					break;
 
-    public static AbstractStorageDeviceUnmounter getInstance() {
-	if (instance == null) {
-	    throw new UnsupportedOperationException("Your Operative System (" + OSName + ") is not supported!");
-	}
+				case LINUX:
+					instance = new LinuxStorageDeviceUnmounter();
+					break;
 
-	return instance;
+				case MAC_OS:
+					instance = new OSXStorageDeviceUnmounter();
+					break;
+			}
+		}
+
+		return instance;
     }
 
     public abstract void unmount(USBStorageDevice usbStorageDevice) throws IOException;

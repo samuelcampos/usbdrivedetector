@@ -15,8 +15,7 @@
  */
 package net.samuelcampos.usbdrivedetector.process;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.util.function.Consumer;
@@ -26,16 +25,15 @@ import java.util.function.Predicate;
  *
  * @author samuelcampos
  */
+@Slf4j
 public class CommandExecutor implements Closeable {
-
-    private static final Logger logger = LoggerFactory.getLogger(CommandExecutor.class);
 
     private final BufferedReader input;
     private final Process process;
 
     public CommandExecutor(final String command) throws IOException {
-        if (logger.isTraceEnabled()) {
-            logger.trace("Running command: " + command);
+        if (log.isTraceEnabled()) {
+            log.trace("Running command: {}", command);
         }
         
         process = Runtime.getRuntime().exec(command);
@@ -81,7 +79,7 @@ public class CommandExecutor implements Closeable {
             try {
                 input.close();
             } catch (IOException e) {
-                logger.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
             }
         }
 
