@@ -36,10 +36,10 @@ public class USBDeviceDetectorManager {
      */
     private static final long DEFAULT_POLLING_INTERVAL = 5000;
 
-    private long currentPollingInterval = DEFAULT_POLLING_INTERVAL;
-
     private final Set<USBStorageDevice> connectedDevices;
     private final List<IUSBDriveListener> listeners;
+
+    private long currentPollingInterval;
     private ListenerTask listenerTask;
 
 
@@ -104,9 +104,14 @@ public class USBDeviceDetectorManager {
      * Forces the polling to stop, even if there are still listeners attached
      */
     private synchronized void stop() {
-        if (listenerTask != null) {
-            listenerTask.interrupt();
-            listenerTask = null;
+        try {
+            if (listenerTask != null) {
+                listenerTask.interrupt();
+                listenerTask.join(2 * currentPollingInterval);
+                listenerTask = null;
+            }
+        } catch (InterruptedException e) {
+            log.error("Unable to with for 'listenerTask' to die.", e);
         }
     }
 

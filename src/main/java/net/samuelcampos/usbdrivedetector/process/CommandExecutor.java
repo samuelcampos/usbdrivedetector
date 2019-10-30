@@ -28,6 +28,7 @@ import java.util.function.Predicate;
 @Slf4j
 public class CommandExecutor implements Closeable {
 
+    private final String command;
     private final BufferedReader input;
     private final Process process;
 
@@ -35,10 +36,10 @@ public class CommandExecutor implements Closeable {
         if (log.isTraceEnabled()) {
             log.trace("Running command: {}", command);
         }
-        
-        process = Runtime.getRuntime().exec(command);
 
-        input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        this.command = command;
+        this.process = Runtime.getRuntime().exec(command);
+        this.input = new BufferedReader(new InputStreamReader(process.getInputStream()));
     }
 
     public void processOutput(final Consumer<String> method) throws IOException{
@@ -75,6 +76,16 @@ public class CommandExecutor implements Closeable {
 
     @Override
     public void close() throws IOException {
+        try {
+            int exitValue = process.waitFor();
+
+            if (exitValue != 0) {
+                log.warn("Abnormal command '{}' terminantion. Exit value: {}", command, exitValue);
+            }
+        } catch (InterruptedException e) {
+            log.error("Error while waiting for command '{}' to complete", command, e);
+        }
+
         if (input != null) {
             try {
                 input.close();
@@ -83,9 +94,7 @@ public class CommandExecutor implements Closeable {
             }
         }
 
-        if (process != null) {
-            process.destroy();
-        }
+        process.destroy();
     }
 
 }
