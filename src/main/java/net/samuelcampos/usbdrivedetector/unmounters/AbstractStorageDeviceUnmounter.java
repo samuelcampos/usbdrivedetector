@@ -1,9 +1,12 @@
 /*
- * Copyright 2014 samuelcampos.
+ * Copyright 2019 samuelcampos.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * 		http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -13,42 +16,37 @@
 package net.samuelcampos.usbdrivedetector.unmounters;
 
 import java.io.IOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import net.samuelcampos.usbdrivedetector.USBStorageDevice;
+import net.samuelcampos.usbdrivedetector.utils.OSUtils;
 
 public abstract class AbstractStorageDeviceUnmounter {
 
-    private static final String OSName = System.getProperty("os.name").toLowerCase();
+	/**
+	 * {@link AbstractStorageDeviceUnmounter} instance. <br/>
+	 * This instance is created (Thread-Safe) when the JVM loads the class.
+	 */
+	private static AbstractStorageDeviceUnmounter instance;
 
-    protected static final Logger logger = LoggerFactory.getLogger(AbstractStorageDeviceUnmounter.class);
+	public static synchronized AbstractStorageDeviceUnmounter getInstance() {
+		if (instance == null) {
+			switch (OSUtils.getOsType()) {
+			case WINDOWS:
+				instance = new WindowsStorageDeviceUnmounter();
+				break;
 
-    /**
-     * {@link AbstractStorageDeviceUnmounter} instance. <br/>
-     * This instance is created (Thread-Safe) when the JVM loads the class.
-     */
-    private static final AbstractStorageDeviceUnmounter instance;
+			case LINUX:
+				instance = new LinuxStorageDeviceUnmounter();
+				break;
 
-    static {
-	if (OSName.startsWith("win")) {
-	    instance = new WindowsStorageDeviceUnmounter();
-	} else if (OSName.startsWith("linux")) {
-	    instance = new LinuxStorageDeviceUnmounter();
-	} else if (OSName.startsWith("mac")) {
-	    instance = new OSXStorageDeviceUnmounter();
-	} else {
-	    instance = null;
+			case MAC_OS:
+				instance = new OSXStorageDeviceUnmounter();
+				break;
+			}
+		}
+
+		return instance;
 	}
-    }
 
-    public static AbstractStorageDeviceUnmounter getInstance() {
-	if (instance == null) {
-	    throw new UnsupportedOperationException("Your Operative System (" + OSName + ") is not supported!");
-	}
-
-	return instance;
-    }
-
-    public abstract void unmount(USBStorageDevice usbStorageDevice) throws IOException;
+	public abstract void unmount(USBStorageDevice usbStorageDevice) throws IOException;
 
 }

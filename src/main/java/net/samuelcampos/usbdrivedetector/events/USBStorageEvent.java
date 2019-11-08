@@ -16,31 +16,19 @@
 
 package net.samuelcampos.usbdrivedetector.events;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import net.samuelcampos.usbdrivedetector.USBStorageDevice;
 
 /**
  *
  * @author samuelcampos
  */
+@Getter
+@ToString
+@RequiredArgsConstructor
 public class USBStorageEvent {
-    private final USBStorageDevice storageDevice;
-    private final DeviceEventType eventType;
-    
-    public USBStorageEvent(final USBStorageDevice storageDevice, final DeviceEventType eventType) {
-        this.storageDevice = storageDevice;
-        this.eventType = eventType;
-    }
-    
-    public USBStorageDevice getStorageDevice() {
-        return storageDevice;
-    }
-
-    public DeviceEventType getEventType() {
-        return eventType;
-    }
-
-    @Override
-    public String toString() {
-        return "USBStorageEvent{" + "storageDevice=" + storageDevice + ", eventType=" + eventType + '}';
-    }
+	private final USBStorageDevice storageDevice;
+	private final DeviceEventType eventType;
 }

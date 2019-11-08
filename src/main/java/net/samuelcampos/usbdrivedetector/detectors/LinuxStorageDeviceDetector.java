@@ -15,106 +15,105 @@
  */
 package net.samuelcampos.usbdrivedetector.detectors;
 
-import java.io.File;
+import lombok.extern.slf4j.Slf4j;
+import net.samuelcampos.usbdrivedetector.USBStorageDevice;
+import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import net.samuelcampos.usbdrivedetector.USBStorageDevice;
-import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
 
 /**
  * Tested on Linux Ubuntu 13.10
  *
  * @author samuelcampos
  */
+@Slf4j
 public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
 
-    private static final Logger logger = LoggerFactory.getLogger(LinuxStorageDeviceDetector.class);
+	private static final String CMD_DF = "df -l";
+	private static final Pattern command1Pattern = Pattern.compile("^(\\/[^ ]+)[^%]+%[ ]+(.+)$");
 
-    private static final String CMD_DF = "df -l";
-    private static final Pattern command1Pattern = Pattern.compile("^(\\/[^ ]+)[^%]+%[ ]+(.+)$");
+	private static final String CMD_CHECK_USB = "udevadm info -q property -n ";
 
-    private static final String CMD_CHECK_USB = "udevadm info -q property -n ";
+	private static final String INFO_BUS = "ID_BUS";
+	private static final String INFO_USB = "usb";
+	private static final String INFO_NAME = "ID_FS_LABEL";
+	private static final String INFO_UUID = "ID_FS_UUID";
 
-    private static final String INFO_BUS = "ID_BUS";
-    private static final String INFO_USB = "usb";
-    private static final String INFO_NAME = "ID_FS_LABEL";
-    private static final String INFO_UUID = "ID_FS_UUID";
+	private static final String DISK_PREFIX = "/dev/";
 
-    private static final String DISK_PREFIX = "/dev/";
+	protected LinuxStorageDeviceDetector() {
+		super();
+	}
 
-    protected LinuxStorageDeviceDetector() {
-        super();
-    }
+	private void readDiskInfo(final DiskInfo disk) {
 
+		final String command = CMD_CHECK_USB + disk.getDevice();
 
-    private void readDiskInfo(final DiskInfo disk) {
+		try (final CommandExecutor commandExecutor = new CommandExecutor(command)) {
 
-        final String command = CMD_CHECK_USB + disk.getDevice();
+			commandExecutor.processOutput(outputLine -> {
 
-        try (final CommandExecutor commandExecutor = new CommandExecutor(command)) {
+				final String[] parts = outputLine.split("=");
 
-            commandExecutor.processOutput(outputLine -> {
+				if (parts.length > 1) {
+					switch (parts[0].trim()) {
+					case INFO_BUS:
+						disk.setUSB(INFO_USB.equals(parts[1].trim()));
+						break;
+					case INFO_NAME:
+						disk.setName(parts[1].trim());
+						break;
+					case INFO_UUID:
+						disk.setUuid(parts[1].trim());
+						break;
+					}
+				}
 
-                final String[] parts = outputLine.split("=");
+			});
 
-                if(parts.length > 1){
-                    if(INFO_BUS.equals(parts[0].trim())){
-                        disk.setUSB(INFO_USB.equals(parts[1].trim()));
-                    }
-                    else if(INFO_NAME.equals(parts[0].trim())){
-                        disk.setName(parts[1].trim());
-                    }
-                    else if(INFO_UUID.equals(parts[0].trim())){
-                        disk.setUUID(parts[1].trim());
-                    }
-                }
+		} catch (final IOException e) {
+			log.error(e.getMessage(), e);
+		}
 
-            });
+	}
 
-        } catch (final IOException e) {
-            logger.error(e.getMessage(), e);
-        }
+	@Override
+	public List<USBStorageDevice> getStorageDevicesDevices() {
+		final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
-    }
+		try (final CommandExecutor commandExecutor = new CommandExecutor(CMD_DF)) {
+			commandExecutor.processOutput((String outputLine) -> {
+				final Matcher matcher = command1Pattern.matcher(outputLine);
 
+				if (matcher.matches()) {
 
-    @Override
-    public List<USBStorageDevice> getStorageDevicesDevices() {
-        final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
+					// device name, like /dev/sdh1
+					final String device = matcher.group(1);
 
-        try (final CommandExecutor commandExecutor = new CommandExecutor(CMD_DF)){
-            commandExecutor.processOutput((String outputLine) -> {
-                final Matcher matcher = command1Pattern.matcher(outputLine);
+					// mount point, like /media/usb
+					final String rootPath = matcher.group(2);
 
-                if (matcher.matches()) {
+					if (device.startsWith(DISK_PREFIX)) {
+						final DiskInfo disk = new DiskInfo(device);
+						disk.setMountPoint(rootPath);
+						readDiskInfo(disk);
 
-                    // device name, like /dev/sdh1
-                    final String device = matcher.group(1);
+						if (disk.isUSB()) {
+							getUSBDevice(disk.getMountPoint(), disk.getName(), disk.getDevice(), disk.getUuid())
+									.ifPresent(listDevices::add);
+						}
+					}
+				}
+			});
 
-                    // mount point, like /media/usb
-                    final String rootPath = matcher.group(2);
+		} catch (IOException e) {
+			log.error(e.getMessage(), e);
+		}
 
-                    if(device.startsWith(DISK_PREFIX)){
-                        final DiskInfo disk = new DiskInfo(device);
-                        disk.setMountPoint(rootPath);
-                        readDiskInfo(disk);
-
-                        if(disk.isUSB()){
-                            listDevices.add(new USBStorageDevice(new File(disk.getMountPoint()), disk.getName(), disk.getDevice(), disk.getUUID()));
-                        }
-                    }
-                }
-            });
-
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        }
-
-        return listDevices;
-    }
+		return listDevices;
+	}
 }

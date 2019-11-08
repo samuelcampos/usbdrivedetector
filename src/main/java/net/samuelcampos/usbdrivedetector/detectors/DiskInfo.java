@@ -15,59 +15,21 @@
  */
 package net.samuelcampos.usbdrivedetector.detectors;
 
+import lombok.Data;
 
+@Data
 public class DiskInfo {
-    private String device;
-    private String mountPoint;
-    private String name;
-    private String uuid;
-    private boolean isUSB;
+	private String device;
+	private String mountPoint;
+	private String name;
+	private String uuid;
+	private boolean isUSB;
 
-    public DiskInfo(final String device) {
-        this.device = device;
-        this.mountPoint = "";
-        this.name = "";
-        this.uuid = "";
-        this.isUSB = false;
-    }
-
-    public String getUUID() {
-	return uuid;
-    }
-
-    public void setUUID(String uuid) {
-	this.uuid = uuid;
-    }
-
-    public String getDevice() {
-        return device;
-    }
-
-    public void setDevice(String device) {
-        this.device = device;
-    }
-
-    public String getMountPoint() {
-        return mountPoint;
-    }
-
-    public void setMountPoint(String mountPoint) {
-        this.mountPoint = mountPoint;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public boolean isUSB() {
-        return isUSB;
-    }
-
-    public void setUSB(boolean USB) {
-        isUSB = USB;
-    }
+	public DiskInfo(final String device) {
+		this.device = device;
+		this.mountPoint = "";
+		this.name = "";
+		this.uuid = "";
+		this.isUSB = false;
+	}
 }

@@ -15,257 +15,246 @@
  */
 package net.samuelcampos.usbdrivedetector;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import net.samuelcampos.usbdrivedetector.detectors.AbstractStorageDeviceDetector;
 import net.samuelcampos.usbdrivedetector.events.DeviceEventType;
 import net.samuelcampos.usbdrivedetector.events.IUSBDriveListener;
 import net.samuelcampos.usbdrivedetector.events.USBStorageEvent;
+import net.samuelcampos.usbdrivedetector.unmounters.AbstractStorageDeviceUnmounter;
 
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @author samuelcampos
  */
+@Slf4j
 public class USBDeviceDetectorManager {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(USBDeviceDetectorManager.class);
+	/**
+	 * The default polling interval is 5 seconds
+	 */
+	private static final long DEFAULT_POLLING_INTERVAL = 5000;
 
-    /**
-     * The default polling interval is 10 seconds
-     */
-    private static final long DEFAULT_POLLING_INTERVAL = 10000;
+	private final Set<USBStorageDevice> connectedDevices;
+	private final List<IUSBDriveListener> listeners;
 
-    private long currentPollingInterval = DEFAULT_POLLING_INTERVAL;
+	private long currentPollingInterval;
+	private ListenerTask listenerTask;
 
-    private final Set<USBStorageDevice> connectedDevices;
-    private final List<IUSBDriveListener> listeners;
-    private ListenerTask listenerTask;
+	public USBDeviceDetectorManager() {
+		this(DEFAULT_POLLING_INTERVAL);
+	}
 
+	/**
+	 * Creates a new USBDeviceDetectorManager
+	 * <p>
+	 * The polling interval is used as the update frequency for any attached
+	 * listeners.
+	 * </p>
+	 * <p>
+	 * Polling doesn't happen until at least one listener is attached.
+	 * </p>
+	 *
+	 * @param pollingInterval the interval in milliseconds to poll for the USB
+	 *                        storage devices on the system.
+	 */
+	public USBDeviceDetectorManager(final long pollingInterval) {
+		listeners = new ArrayList<>();
+		connectedDevices = new HashSet<>();
 
-    public USBDeviceDetectorManager() {
-        this(DEFAULT_POLLING_INTERVAL);
-    }
+		currentPollingInterval = pollingInterval;
+	}
 
-    /**
-     * Creates a new USBDeviceDetectorManager
-     * <p>
-     * The polling interval is used as the update frequency for any attached
-     * listeners.
-     * </p>
-     * <p>
-     * Polling doesn't happen until at least one listener is attached.
-     * </p>
-     *
-     * @param pollingInterval the interval in milliseconds to poll for the USB
-     *                        storage devices on the system.
-     */
-    public USBDeviceDetectorManager(final long pollingInterval) {
-        listeners = new ArrayList<>();
-        connectedDevices = new HashSet<>();
+	/**
+	 * Sets the polling interval
+	 *
+	 * @param pollingInterval the interval in milliseconds to poll for the USB
+	 *                        storage devices on the system.
+	 */
+	public synchronized void setPollingInterval(final long pollingInterval) {
+		if (pollingInterval <= 0) {
+			throw new IllegalArgumentException("'pollingInterval' must be greater than 0");
+		}
 
-        currentPollingInterval = pollingInterval;
-    }
+		currentPollingInterval = pollingInterval;
 
-    /**
-     * Sets the polling interval
-     *
-     * @param pollingInterval the interval in milliseconds to poll for the USB
-     *                        storage devices on the system.
-     */
-    public synchronized void setPollingInterval(final long pollingInterval) {
-        if (pollingInterval <= 0) {
-            throw new IllegalArgumentException("'pollingInterval' must be greater than 0");
-        }
+		if (listeners.size() > 0) {
+			stop();
+			start();
+		}
+	}
 
-        currentPollingInterval = pollingInterval;
+	/**
+	 * Start polling to update listeners
+	 * <p>
+	 * This method only needs to be called if {@link #stop() stop()} has been called
+	 * after listeners have been added.
+	 * </p>
+	 */
+	private synchronized void start() {
+		if (listenerTask == null) {
+			listenerTask = new ListenerTask(currentPollingInterval);
+			listenerTask.start();
+		}
+	}
 
-        if (listeners.size() > 0) {
-            stop();
-            start();
-        }
-    }
+	/**
+	 * Forces the polling to stop, even if there are still listeners attached
+	 */
+	private synchronized void stop() {
+		try {
+			if (listenerTask != null) {
+				listenerTask.interrupt();
+				listenerTask.join(2 * currentPollingInterval);
+				listenerTask = null;
+			}
+		} catch (InterruptedException e) {
+			log.error("Unable to with for 'listenerTask' to die.", e);
+		}
+	}
 
-    /**
-     * Start polling to update listeners
-     * <p>
-     * This method only needs to be called if {@link #stop() stop()} has been
-     * called after listeners have been added.
-     * </p>
-     */
-    private synchronized void start() {
-        if (listenerTask == null) {
-            listenerTask = new ListenerTask(currentPollingInterval);
-            listenerTask.start();
-        }
-    }
+	/**
+	 * Adds an IUSBDriveListener.
+	 * <p>
+	 * The polling timer is automatically started as needed when a listener is
+	 * added.
+	 * </p>
+	 *
+	 * @param listener the listener to be updated with the attached drives
+	 * @return true if the listener was not in the list and was successfully added
+	 */
+	public synchronized boolean addDriveListener(final IUSBDriveListener listener) {
+		if (listeners.contains(listener)) {
+			return false;
+		}
 
-    /**
-     * Forces the polling to stop, even if there are still listeners attached
-     */
-    private synchronized void stop() {
-        if (listenerTask != null) {
-            listenerTask.interrupt();
-            listenerTask = null;
-        }
-    }
+		listeners.add(listener);
+		start();
+		return true;
+	}
 
-    /**
-     * Adds an IUSBDriveListener.
-     * <p>
-     * The polling timer is automatically started as needed when a listener is
-     * added.
-     * </p>
-     *
-     * @param listener the listener to be updated with the attached drives
-     * @return true if the listener was not in the list and was successfully
-     * added
-     */
-    public synchronized boolean addDriveListener(final IUSBDriveListener listener) {
-        if (listeners.contains(listener)) {
-            return false;
-        }
+	/**
+	 * Removes an IUSBDriveListener.
+	 * <p>
+	 * The polling timer is automatically stopped if this is the last listener being
+	 * removed.
+	 * </p>
+	 *
+	 * @param listener the listener to remove
+	 * @return true if the listener existed in the list and was successfully removed
+	 */
+	public synchronized boolean removeDriveListener(final IUSBDriveListener listener) {
+		final boolean removed = listeners.remove(listener);
+		if (listeners.isEmpty()) {
+			stop();
+		}
 
-        listeners.add(listener);
-        start();
-        return true;
-    }
+		return removed;
+	}
 
-    /**
-     * Removes an IUSBDriveListener.
-     * <p>
-     * The polling timer is automatically stopped if this is the last listener
-     * being removed.
-     * </p>
-     *
-     * @param listener the listener to remove
-     * @return true if the listener existed in the list and was successfully
-     * removed
-     */
-    public synchronized boolean removeDriveListener(final IUSBDriveListener listener) {
-        final boolean removed = listeners.remove(listener);
-        if (listeners.isEmpty()) {
-            stop();
-        }
+	/**
+	 * Gets a list of currently attached USB storage devices.
+	 * <p>
+	 * This method has no effect on polling or listeners being updated
+	 * </p>
+	 *
+	 * @return list of attached USB storage devices.
+	 */
+	public List<USBStorageDevice> getRemovableDevices() {
+		return AbstractStorageDeviceDetector.getInstance().getStorageDevicesDevices();
+	}
 
-        return removed;
-    }
+	public void unmountStorageDevice(USBStorageDevice usbStorageDevice) throws IOException {
+		AbstractStorageDeviceUnmounter.getInstance().unmount(usbStorageDevice);
+	}
 
-    /**
-     * Gets a set of currently connected USB storage devices.
-     * <p>
-     * This method has no effect on polling or listeners being updated
-     * </p>
-     *
-     * @return set of attached USB storage devices.
-     */
-    public Set<USBStorageDevice> getConnectedDevices() {
-	return this.connectedDevices;
-    }
+	/**
+	 * Updates the internal state of this manager and sends
+	 *
+	 * @param currentConnectedDevices a list with the currently connected USB
+	 *                                storage devices
+	 */
+	private void updateConnectedDevices(final List<USBStorageDevice> currentConnectedDevices) {
+		final List<USBStorageDevice> removedDevices = new ArrayList<>();
 
-    /**
-     * Gets a list of currently attached USB storage devices.
-     * <p>
-     * This method has no effect on polling or listeners being updated
-     * </p>
-     *
-     * @return list of attached USB storage devices.
-     */
-    public List<USBStorageDevice> getRemovableDevices() {
-        return AbstractStorageDeviceDetector.getInstance().getStorageDevicesDevices();
-    }
+		synchronized (this) {
+			final Iterator<USBStorageDevice> itConnectedDevices = connectedDevices.iterator();
 
-    /**
-     * Updates the internal state of this manager and sends
-     *
-     * @param currentConnectedDevices a list with the currently connected USB storage devices
-     */
-    private void updateConnectedDevices(final List<USBStorageDevice> currentConnectedDevices) {
-        final List<USBStorageDevice> removedDevices = new ArrayList<>();
+			while (itConnectedDevices.hasNext()) {
+				final USBStorageDevice device = itConnectedDevices.next();
 
-        synchronized (this) {
-            final Iterator<USBStorageDevice> itConnectedDevices = connectedDevices.iterator();
+				if (currentConnectedDevices.contains(device)) {
+					currentConnectedDevices.remove(device);
+				} else {
+					removedDevices.add(device);
 
-            while (itConnectedDevices.hasNext()) {
-                final USBStorageDevice device = itConnectedDevices.next();
+					itConnectedDevices.remove();
+				}
+			}
 
-                if (currentConnectedDevices.contains(device)) {
-                    currentConnectedDevices.remove(device);
-                } else {
-                    removedDevices.add(device);
+			connectedDevices.addAll(currentConnectedDevices);
+		}
 
-                    itConnectedDevices.remove();
-                }
-            }
+		currentConnectedDevices
+				.forEach(device -> sendEventToListeners(new USBStorageEvent(device, DeviceEventType.CONNECTED)));
 
-            connectedDevices.addAll(currentConnectedDevices);
-        }
+		removedDevices.forEach(device -> sendEventToListeners(new USBStorageEvent(device, DeviceEventType.REMOVED)));
+	}
 
-        currentConnectedDevices.forEach(device ->
-                sendEventToListeners(new USBStorageEvent(device, DeviceEventType.CONNECTED)));
+	private void sendEventToListeners(final USBStorageEvent event) {
+		/*
+		 * Make this thread safe, so we deal with a copy of listeners so any listeners
+		 * being added or removed don't cause a ConcurrentModificationException. Also
+		 * allows listeners to remove themselves while processing the event
+		 */
+		final List<IUSBDriveListener> listenersCopy;
+		synchronized (listeners) {
+			listenersCopy = new ArrayList<>(listeners);
+		}
 
-        removedDevices.forEach(device ->
-                sendEventToListeners(new USBStorageEvent(device, DeviceEventType.REMOVED)));
-    }
+		for (IUSBDriveListener listener : listenersCopy) {
+			try {
+				listener.usbDriveEvent(event);
+			} catch (Exception ex) {
+				log.error("An IUSBDriveListener threw an exception", ex);
+			}
+		}
+	}
 
-    private void sendEventToListeners(final USBStorageEvent event) {
-        /*
-         Make this thread safe, so we deal with a copy of listeners so any
-         listeners being added or removed don't cause a ConcurrentModificationException.
-         Also allows listeners to remove themselves while processing the event
-         */
-        final List<IUSBDriveListener> listenersCopy;
-        synchronized (listeners) {
-            listenersCopy = new ArrayList<>(listeners);
-        }
+	private class ListenerTask extends Thread {
 
-        for (IUSBDriveListener listener : listenersCopy) {
-            try {
-                listener.usbDriveEvent(event);
-            } catch (Exception ex) {
-                logger.error("An IUSBDriveListener threw an exception", ex);
-            }
-        }
-    }
+		private final long pollingInterval;
 
-    private class ListenerTask extends Thread {
+		public ListenerTask(final long pollingInterval) {
+			this.pollingInterval = pollingInterval;
 
-        private final long pollingInterval;
+			setDaemon(true);
+		}
 
-        public ListenerTask(final long pollingInterval) {
-            this.pollingInterval = pollingInterval;
+		@Override
+		public void run() {
+			try {
+				while (!Thread.currentThread().isInterrupted()) {
+					try {
+						log.trace("Polling refresh task is running");
 
-            setDaemon(true);
-        }
+						List<USBStorageDevice> actualConnectedDevices = getRemovableDevices();
 
-        @Override
-        public void run() {
-            try {
-                while (!Thread.currentThread().isInterrupted()) {
-                    try {
-                        logger.trace("Polling refresh task is running");
+						updateConnectedDevices(actualConnectedDevices);
 
-                        List<USBStorageDevice> actualConnectedDevices = AbstractStorageDeviceDetector.getInstance().getStorageDevicesDevices();
+					} catch (Exception e) {
+						log.error("Error while refreshing device list", e);
+					}
 
-                        updateConnectedDevices(actualConnectedDevices);
+					sleep(pollingInterval);
+				}
+			} catch (InterruptedException ex) {
+				if (!ex.getMessage().equalsIgnoreCase("sleep interrupted")) {
+					log.error("Stopping polling thread", ex);
+				}
+			}
+		}
 
-                    } catch (Exception e) {
-                        logger.error("Error while refreshing device list", e);
-                    }
-
-                    sleep(pollingInterval);
-                }
-            } catch (InterruptedException ex) {
-            	if (!ex.getMessage().equalsIgnoreCase("sleep interrupted")) {
-                    logger.error("Stopping polling thread", ex);
-            	}
-            }
-        }
-
-    }
+	}
 }

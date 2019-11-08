@@ -22,13 +22,13 @@ package net.samuelcampos.usbdrivedetector.events;
  * @author samuelcampos
  */
 public enum DeviceEventType {
-    /**
-     * A device has been removed.
-     */
-    REMOVED,
+	/**
+	 * A device has been removed.
+	 */
+	REMOVED,
 
-    /**
-     * A new device has been connected.
-     */
-    CONNECTED
+	/**
+	 * A new device has been connected.
+	 */
+	CONNECTED
 }
