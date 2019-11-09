@@ -1,5 +1,6 @@
 package net.samuelcampos.usbdrivedetector;
 
+import net.samuelcampos.usbdrivedetector.detectors.AbstractStorageDeviceDetector;
 import net.samuelcampos.usbdrivedetector.events.IUSBDriveListener;
 import net.samuelcampos.usbdrivedetector.events.USBStorageEvent;
 
@@ -12,8 +13,10 @@ import java.io.IOException;
 public class SimpleTest implements IUSBDriveListener {
 	public static void main(String[] args) throws IOException {
 		System.out.println("Start Test");
+		
+		AbstractStorageDeviceDetector.getInstance().testAccessToStorageDevices();
+		
 		USBDeviceDetectorManager driveDetector = new USBDeviceDetectorManager();
-
 		driveDetector.getRemovableDevices().forEach(System.out::println);
 
 		SimpleTest sTest = new SimpleTest();

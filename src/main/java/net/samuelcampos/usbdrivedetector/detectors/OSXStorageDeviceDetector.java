@@ -152,4 +152,11 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
 
 		return disk;
 	}
+	
+	@Override
+	public void testAccessToStorageDevices() throws IOException {
+		try (CommandExecutor commandExecutor = new CommandExecutor(CMD_DF)) {
+		}
+	}
+
 }

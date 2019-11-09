@@ -116,4 +116,11 @@ public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
 
 		return listDevices;
 	}
+	
+	@Override
+	public void testAccessToStorageDevices() throws IOException {
+		try (CommandExecutor commandExecutor = new CommandExecutor(CMD_DF)) {
+		}
+	}
+
 }

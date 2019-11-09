@@ -80,6 +80,12 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
 		return listDevices;
 	}
 
+	@Override
+	public void testAccessToStorageDevices() throws IOException {
+		try (CommandExecutor commandExecutor = new CommandExecutor(CMD_WMI_USB, CMD_WMI_ARGS)) {
+		}
+	}
+
 	private String getDeviceName(final String rootPath) {
 		final File f = new File(rootPath);
 		final FileSystemView v = FileSystemView.getFileSystemView();
@@ -98,4 +104,5 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
 		}
 		return name;
 	}
+
 }
