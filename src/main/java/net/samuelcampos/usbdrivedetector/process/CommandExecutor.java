@@ -19,9 +19,6 @@ import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -39,17 +36,12 @@ public class CommandExecutor implements Closeable {
 	private final Process process;
 
 	public CommandExecutor(final String command) throws IOException {
-		this(command, "");
-	}
-
-	public CommandExecutor(final String command, final String parameters) throws IOException {
-		this.command = command + " " + parameters;
-
 		if (log.isTraceEnabled()) {
 			log.trace("Running command: {}", command);
 		}
 
-		this.process = Runtime.getRuntime().exec(prepareCommandAndArgs(command, parameters));
+		this.command = command;
+		this.process = Runtime.getRuntime().exec(command);
 		this.input = new BufferedReader(new InputStreamReader(process.getInputStream()));
 	}
 
@@ -108,12 +100,4 @@ public class CommandExecutor implements Closeable {
 		process.destroy();
 	}
 
-	private String[] prepareCommandAndArgs(final String command, final String parameters) {
-		String[] preparedCommand = { command };
-		String[] preparedArgs = parameters.split(" ");
-		List<String> list = new ArrayList<>(Arrays.asList(preparedCommand));
-		list.addAll(Arrays.asList(preparedArgs));
-		String[] fullCommand = new String[list.size()];
-		return list.toArray(fullCommand);
-	}
 }

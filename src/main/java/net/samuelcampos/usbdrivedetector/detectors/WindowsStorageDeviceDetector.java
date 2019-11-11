@@ -15,16 +15,17 @@
  */
 package net.samuelcampos.usbdrivedetector.detectors;
 
-import lombok.extern.slf4j.Slf4j;
-import net.samuelcampos.usbdrivedetector.USBStorageDevice;
-import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
-import net.samuelcampos.usbdrivedetector.utils.OSUtils;
-
-import javax.swing.filechooser.FileSystemView;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.filechooser.FileSystemView;
+
+import lombok.extern.slf4j.Slf4j;
+import net.samuelcampos.usbdrivedetector.USBStorageDevice;
+import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
+import net.samuelcampos.usbdrivedetector.utils.OSUtils;
 
 /**
  *
@@ -41,7 +42,7 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
 	 * wmic logicaldisk where drivetype=2 get description,deviceid,volumename
 	 */
 	private static final String CMD_WMI_ARGS = "logicaldisk where drivetype=2 get DeviceID,VolumeSerialNumber";
-	private static final String CMD_WMI_USB;
+	private static String CMD_WMI_USB;
 
 	static {
 		if (Float.parseFloat(OSUtils.getOsVersion()) < 10.0) {
@@ -49,6 +50,8 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
 		} else {
 			CMD_WMI_USB = WMIC_PATH_WIN10;
 		}
+		
+		CMD_WMI_USB = CMD_WMI_USB + " " + CMD_WMI_ARGS;
 	}
 
 	protected WindowsStorageDeviceDetector() {
@@ -59,7 +62,7 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
 	public List<USBStorageDevice> getStorageDevicesDevices() {
 		final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
-		try (CommandExecutor commandExecutor = new CommandExecutor(CMD_WMI_USB, CMD_WMI_ARGS)) {
+		try (CommandExecutor commandExecutor = new CommandExecutor(CMD_WMI_USB)) {
 			commandExecutor.processOutput(outputLine -> {
 
 				final String[] parts = outputLine.split(" ");
@@ -78,12 +81,6 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
 		}
 
 		return listDevices;
-	}
-
-	@Override
-	public void testAccessToStorageDevices() throws IOException {
-		try (CommandExecutor commandExecutor = new CommandExecutor(CMD_WMI_USB, CMD_WMI_ARGS)) {
-		}
 	}
 
 	private String getDeviceName(final String rootPath) {

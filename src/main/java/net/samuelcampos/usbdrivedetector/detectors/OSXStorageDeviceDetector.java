@@ -15,16 +15,16 @@
  */
 package net.samuelcampos.usbdrivedetector.detectors;
 
-import lombok.extern.slf4j.Slf4j;
-import net.samuelcampos.usbdrivedetector.USBStorageDevice;
-import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
-import net.samuelcampos.usbdrivedetector.utils.OSUtils;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import lombok.extern.slf4j.Slf4j;
+import net.samuelcampos.usbdrivedetector.USBStorageDevice;
+import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
+import net.samuelcampos.usbdrivedetector.utils.OSUtils;
 
 /**
  *
@@ -153,10 +153,4 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
 		return disk;
 	}
 	
-	@Override
-	public void testAccessToStorageDevices() throws IOException {
-		try (CommandExecutor commandExecutor = new CommandExecutor(CMD_DF)) {
-		}
-	}
-
 }

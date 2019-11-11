@@ -15,14 +15,13 @@
  */
 package net.samuelcampos.usbdrivedetector.detectors;
 
+import java.io.File;
+import java.util.List;
+import java.util.Optional;
+
 import lombok.extern.slf4j.Slf4j;
 import net.samuelcampos.usbdrivedetector.USBStorageDevice;
 import net.samuelcampos.usbdrivedetector.utils.OSUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * This class is prepared to:
@@ -72,8 +71,6 @@ public abstract class AbstractStorageDeviceDetector {
 	 */
 	public abstract List<USBStorageDevice> getStorageDevicesDevices();
 
-	public abstract void testAccessToStorageDevices() throws IOException;
-	
 	static Optional<USBStorageDevice> getUSBDevice(final String rootPath) {
 		return getUSBDevice(rootPath, null, null, null);
 	}
