@@ -16,5 +16,7 @@
 package net.samuelcampos.usbdrivedetector.utils;
 
 public enum OSType {
-	WINDOWS, MAC_OS, LINUX
+    WINDOWS,
+    MAC_OS,
+    LINUX
 }

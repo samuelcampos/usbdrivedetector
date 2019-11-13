@@ -19,17 +19,17 @@ import lombok.Data;
 
 @Data
 public class DiskInfo {
-	private String device;
-	private String mountPoint;
-	private String name;
-	private String uuid;
-	private boolean isUSB;
+    private String device;
+    private String mountPoint;
+    private String name;
+    private String uuid;
+    private boolean isUSB;
 
-	public DiskInfo(final String device) {
-		this.device = device;
-		this.mountPoint = "";
-		this.name = "";
-		this.uuid = "";
-		this.isUSB = false;
-	}
+    public DiskInfo(final String device) {
+        this.device = device;
+        this.mountPoint = "";
+        this.name = "";
+        this.uuid = "";
+        this.isUSB = false;
+    }
 }

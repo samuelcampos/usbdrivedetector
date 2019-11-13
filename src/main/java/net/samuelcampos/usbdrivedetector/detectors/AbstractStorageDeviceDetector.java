@@ -15,13 +15,13 @@
  */
 package net.samuelcampos.usbdrivedetector.detectors;
 
-import java.io.File;
-import java.util.List;
-import java.util.Optional;
-
 import lombok.extern.slf4j.Slf4j;
 import net.samuelcampos.usbdrivedetector.USBStorageDevice;
 import net.samuelcampos.usbdrivedetector.utils.OSUtils;
+
+import java.io.File;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * This class is prepared to:
@@ -35,66 +35,64 @@ import net.samuelcampos.usbdrivedetector.utils.OSUtils;
 @Slf4j
 public abstract class AbstractStorageDeviceDetector {
 
-	/**
-	 * {@link AbstractStorageDeviceDetector} instance. <br/>
-	 * This instance is created (Thread-Safe) when the JVM loads the class.
-	 */
-	private static AbstractStorageDeviceDetector instance;
+    /**
+     * {@link AbstractStorageDeviceDetector} instance. <br/>
+     * This instance is created (Thread-Safe) when the JVM loads the class.
+     */
+    private static AbstractStorageDeviceDetector instance;
 
-	public static synchronized AbstractStorageDeviceDetector getInstance() {
-		if (instance == null) {
-			switch (OSUtils.getOsType()) {
-			case WINDOWS:
-				instance = new WindowsStorageDeviceDetector();
-				break;
+    public static synchronized AbstractStorageDeviceDetector getInstance() {
+        if (instance == null) {
+            switch (OSUtils.getOsType()) {
+                case WINDOWS:
+                    instance = new WindowsStorageDeviceDetector();
+                    break;
 
-			case LINUX:
-				instance = new LinuxStorageDeviceDetector();
-				break;
+                case LINUX:
+                    instance = new LinuxStorageDeviceDetector();
+                    break;
 
-			case MAC_OS:
-				instance = new OSXStorageDeviceDetector();
-				break;
-			}
-		}
-		
-		return instance;
-	}
+                case MAC_OS:
+                    instance = new OSXStorageDeviceDetector();
+                    break;
+            }
+        }
 
-	protected AbstractStorageDeviceDetector() {
-	}
+        return instance;
+    }
 
-	/**
-	 * Returns the all storage devices currently connected to the computer.
-	 *
-	 * @return the list of the USB storage devices
-	 */
-	public abstract List<USBStorageDevice> getStorageDevicesDevices();
+    protected AbstractStorageDeviceDetector() {
+    }
 
-	static Optional<USBStorageDevice> getUSBDevice(final String rootPath) {
-		return getUSBDevice(rootPath, null, null, null);
-	}
+    /**
+     * Returns the all storage devices currently connected to the computer.
+     *
+     * @return the list of the USB storage devices
+     */
+    public abstract List<USBStorageDevice> getStorageDevicesDevices();
 
-	static Optional<USBStorageDevice> getUSBDevice(final String rootPath, final String deviceName, final String device,
-			final String uuid) {
-		final File root = new File(rootPath);
+    static Optional<USBStorageDevice> getUSBDevice(final String rootPath) {
+        return getUSBDevice(rootPath, null, null, null);
+    }
 
-		if (!root.isDirectory()) {
-			// When a device has recently disconnected, the command may still return the old
-			// root directory of the recently removed device
-			log.trace("Invalid root found: {}", root);
-			return Optional.empty();
-		}
+    static Optional<USBStorageDevice> getUSBDevice(final String rootPath, final String deviceName, final String device, final String uuid) {
+        final File root = new File(rootPath);
 
-		log.trace("Device found: {}", root.getPath());
+        if (!root.isDirectory()) {
+            // When a device has recently disconnected, the command may still return the old root directory of the recently removed device
+            log.trace("Invalid root found: {}", root);
+            return Optional.empty();
+        }
 
-		try {
-			return Optional.of(new USBStorageDevice(root, deviceName, device, uuid));
-		} catch (IllegalArgumentException e) {
-			log.debug("Could not add Device: {}", e.getMessage(), e);
-		}
+        log.trace("Device found: {}", root.getPath());
 
-		return Optional.empty();
-	}
+        try {
+            return Optional.of(new USBStorageDevice(root, deviceName, device, uuid));
+        } catch (IllegalArgumentException e) {
+            log.debug("Could not add Device: {}", e.getMessage(), e);
+        }
+
+        return Optional.empty();
+    }
 
 }

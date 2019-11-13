@@ -29,6 +29,6 @@ import net.samuelcampos.usbdrivedetector.USBStorageDevice;
 @ToString
 @RequiredArgsConstructor
 public class USBStorageEvent {
-	private final USBStorageDevice storageDevice;
-	private final DeviceEventType eventType;
+    private final USBStorageDevice storageDevice;
+    private final DeviceEventType eventType;
 }

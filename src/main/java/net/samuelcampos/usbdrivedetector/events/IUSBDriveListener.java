@@ -17,13 +17,13 @@
 package net.samuelcampos.usbdrivedetector.events;
 
 /**
- * Interface to implement by the classes who want to receive notifications when
+ * Interface to implement by the classes who want to receive notifications when 
  * there are devices Connected or Removed of the computer.
  * 
  * @author samuelcampos
  */
 @FunctionalInterface
 public interface IUSBDriveListener {
-
-	void usbDriveEvent(USBStorageEvent event);
+    
+    void usbDriveEvent(USBStorageEvent event);
 }

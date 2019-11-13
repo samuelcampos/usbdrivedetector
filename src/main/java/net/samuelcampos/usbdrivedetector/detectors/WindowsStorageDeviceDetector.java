@@ -15,17 +15,16 @@
  */
 package net.samuelcampos.usbdrivedetector.detectors;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.filechooser.FileSystemView;
-
 import lombok.extern.slf4j.Slf4j;
 import net.samuelcampos.usbdrivedetector.USBStorageDevice;
 import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
 import net.samuelcampos.usbdrivedetector.utils.OSUtils;
+
+import javax.swing.filechooser.FileSystemView;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -34,72 +33,71 @@ import net.samuelcampos.usbdrivedetector.utils.OSUtils;
 @Slf4j
 public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector {
 
-	private static final String WMIC_PATH_WIN8 = "wmic.exe";
-	// Window 10 broke compatibility by removing the wbem dir from his PATH
-	private static final String WMIC_PATH_WIN10 = System.getenv("WINDIR") + "\\System32\\wbem\\wmic.exe";
+    private static final String WMIC_PATH_WIN8 = "wmic.exe";
+    // Window 10 broke compatibility by removing the wbem dir from his PATH
+    private static final String WMIC_PATH_WIN10 = System.getenv("WINDIR") + "\\System32\\wbem\\wmic.exe";
 
-	/**
-	 * wmic logicaldisk where drivetype=2 get description,deviceid,volumename
-	 */
-	private static final String CMD_WMI_ARGS = "logicaldisk where drivetype=2 get DeviceID,VolumeSerialNumber";
-	private static String CMD_WMI_USB;
+    /**
+     * wmic logicaldisk where drivetype=2 get description,deviceid,volumename
+     */
+    private static final String CMD_WMI_ARGS = "logicaldisk where drivetype=2 get DeviceID,VolumeSerialNumber";
+    private static final String CMD_WMI_USB;
 
-	static {
-		if (Float.parseFloat(OSUtils.getOsVersion()) < 10.0) {
-			CMD_WMI_USB = WMIC_PATH_WIN8;
-		} else {
-			CMD_WMI_USB = WMIC_PATH_WIN10;
-		}
-		
-		CMD_WMI_USB = CMD_WMI_USB + " " + CMD_WMI_ARGS;
-	}
+    static {
+        String wmicPath;
+        if (Float.parseFloat(OSUtils.getOsVersion()) < 10.0) {
+            wmicPath = WMIC_PATH_WIN8;
+        } else {
+            wmicPath = WMIC_PATH_WIN10;
+        }
+        CMD_WMI_USB = wmicPath + " " + CMD_WMI_ARGS;
+    }
 
-	protected WindowsStorageDeviceDetector() {
-		super();
-	}
+    protected WindowsStorageDeviceDetector() {
+        super();
+    }
 
-	@Override
-	public List<USBStorageDevice> getStorageDevicesDevices() {
-		final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
+    @Override
+    public List<USBStorageDevice> getStorageDevicesDevices() {
+        final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
-		try (CommandExecutor commandExecutor = new CommandExecutor(CMD_WMI_USB)) {
-			commandExecutor.processOutput(outputLine -> {
+        try (CommandExecutor commandExecutor = new CommandExecutor(CMD_WMI_USB)) {
+            commandExecutor.processOutput(outputLine -> {
 
-				final String[] parts = outputLine.split(" ");
+        	final String[] parts = outputLine.split(" ");
 
-				if (parts.length > 1 && !parts[0].isEmpty() && !parts[0].equals("DeviceID")
-						&& !parts[0].equals(parts[parts.length - 1])) {
-					final String rootPath = parts[0] + File.separatorChar;
-					final String uuid = parts[parts.length - 1];
+                if(parts.length > 1 && !parts[0].isEmpty() && !parts[0].equals("DeviceID") && !parts[0].equals(parts[parts.length - 1])) {
+                	final String rootPath = parts[0] + File.separatorChar;
+                    final String uuid = parts[parts.length - 1];
 
-					getUSBDevice(rootPath, getDeviceName(rootPath), rootPath, uuid).ifPresent(listDevices::add);
-				}
-			});
+                    getUSBDevice(rootPath, getDeviceName(rootPath), rootPath, uuid)
+                            .ifPresent(listDevices::add);
+                }
+            });
 
-		} catch (IOException e) {
-			log.error(e.getMessage(), e);
-		}
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
 
-		return listDevices;
-	}
+        return listDevices;
+    }
 
-	private String getDeviceName(final String rootPath) {
-		final File f = new File(rootPath);
-		final FileSystemView v = FileSystemView.getFileSystemView();
-		String name = v.getSystemDisplayName(f);
+    private String getDeviceName(final String rootPath) {
+        final File f = new File(rootPath);
+        final FileSystemView v = FileSystemView.getFileSystemView();
+        String name = v.getSystemDisplayName(f);
 
-		if (name != null) {
-			int idx = name.lastIndexOf('(');
-			if (idx != -1) {
-				name = name.substring(0, idx);
-			}
+        if (name != null) {
+            int idx = name.lastIndexOf('(');
+            if (idx != -1) {
+                name = name.substring(0, idx);
+            }
 
-			name = name.trim();
-			if (name.isEmpty()) {
-				name = null;
-			}
-		}
-		return name;
-	}
-
+            name = name.trim();
+            if (name.isEmpty()) {
+                name = null;
+            }
+        }
+        return name;
+    }
 }

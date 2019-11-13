@@ -21,32 +21,32 @@ import net.samuelcampos.usbdrivedetector.utils.OSUtils;
 
 public abstract class AbstractStorageDeviceUnmounter {
 
-	/**
-	 * {@link AbstractStorageDeviceUnmounter} instance. <br/>
-	 * This instance is created (Thread-Safe) when the JVM loads the class.
-	 */
-	private static AbstractStorageDeviceUnmounter instance;
+    /**
+     * {@link AbstractStorageDeviceUnmounter} instance. <br/>
+     * This instance is created (Thread-Safe) when the JVM loads the class.
+     */
+    private static AbstractStorageDeviceUnmounter instance;
 
-	public static synchronized AbstractStorageDeviceUnmounter getInstance() {
+    public static synchronized AbstractStorageDeviceUnmounter getInstance() {
 		if (instance == null) {
 			switch (OSUtils.getOsType()) {
-			case WINDOWS:
-				instance = new WindowsStorageDeviceUnmounter();
-				break;
+				case WINDOWS:
+					instance = new WindowsStorageDeviceUnmounter();
+					break;
 
-			case LINUX:
-				instance = new LinuxStorageDeviceUnmounter();
-				break;
+				case LINUX:
+					instance = new LinuxStorageDeviceUnmounter();
+					break;
 
-			case MAC_OS:
-				instance = new OSXStorageDeviceUnmounter();
-				break;
+				case MAC_OS:
+					instance = new OSXStorageDeviceUnmounter();
+					break;
 			}
 		}
 
 		return instance;
-	}
+    }
 
-	public abstract void unmount(USBStorageDevice usbStorageDevice) throws IOException;
+    public abstract void unmount(USBStorageDevice usbStorageDevice) throws IOException;
 
 }

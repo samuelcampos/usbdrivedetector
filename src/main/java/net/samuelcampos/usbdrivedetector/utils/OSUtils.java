@@ -21,27 +21,27 @@ import static net.samuelcampos.usbdrivedetector.utils.OSType.*;
 
 @UtilityClass
 public final class OSUtils {
-	public static final String OS_NAME = System.getProperty("os.name");
+    public static final String OS_NAME = System.getProperty("os.name");
 
-	public static OSType getOsType() {
-		String osNameLower = OS_NAME.toLowerCase();
+    public static OSType getOsType() {
+        String osNameLower = OS_NAME.toLowerCase();
 
-		if (osNameLower.startsWith("win")) {
-			return WINDOWS;
-		}
+        if (osNameLower.startsWith("win")) {
+            return WINDOWS;
+        }
 
-		if (osNameLower.startsWith("linux")) {
-			return LINUX;
-		}
+        if (osNameLower.startsWith("linux")) {
+            return LINUX;
+        }
 
-		if (osNameLower.startsWith("mac")) {
-			return MAC_OS;
-		}
+        if (osNameLower.startsWith("mac")) {
+            return MAC_OS;
+        }
 
-		throw new UnsupportedOperationException("Your Operative System (" + osNameLower + ") is not supported!");
-	}
+        throw new UnsupportedOperationException("Your Operative System (" + osNameLower + ") is not supported!");
+    }
 
-	public String getOsVersion() {
-		return System.getProperty("os.version");
-	}
+    public String getOsVersion() {
+        return System.getProperty("os.version");
+    }
 }
