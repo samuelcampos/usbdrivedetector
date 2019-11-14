@@ -15,16 +15,14 @@
  */
 package net.samuelcampos.usbdrivedetector.detectors;
 
-import lombok.extern.slf4j.Slf4j;
-import net.samuelcampos.usbdrivedetector.USBStorageDevice;
-import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
-import net.samuelcampos.usbdrivedetector.utils.OSUtils;
-
-import javax.swing.filechooser.FileSystemView;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.filechooser.FileSystemView;
+import lombok.extern.slf4j.Slf4j;
+import net.samuelcampos.usbdrivedetector.USBStorageDevice;
+import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
 
 /**
  *
@@ -33,9 +31,7 @@ import java.util.List;
 @Slf4j
 public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector {
 
-    private static final String WMIC_PATH_WIN8 = "wmic.exe";
-    // Window 10 broke compatibility by removing the wbem dir from his PATH
-    private static final String WMIC_PATH_WIN10 = System.getenv("WINDIR") + "\\System32\\wbem\\wmic.exe";
+    private static final String WMIC_PATH = System.getenv("WINDIR") + "\\System32\\wbem\\wmic.exe";
 
     /**
      * wmic logicaldisk where drivetype=2 get description,deviceid,volumename
@@ -44,13 +40,7 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
     private static final String CMD_WMI_USB;
 
     static {
-        String wmicPath;
-        if (Float.parseFloat(OSUtils.getOsVersion()) < 10.0) {
-            wmicPath = WMIC_PATH_WIN8;
-        } else {
-            wmicPath = WMIC_PATH_WIN10;
-        }
-        CMD_WMI_USB = wmicPath + " " + CMD_WMI_ARGS;
+        CMD_WMI_USB = WMIC_PATH + " " + CMD_WMI_ARGS;
     }
 
     protected WindowsStorageDeviceDetector() {
