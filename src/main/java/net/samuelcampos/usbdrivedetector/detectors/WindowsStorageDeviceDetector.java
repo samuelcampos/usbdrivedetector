@@ -37,11 +37,7 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
      * wmic logicaldisk where drivetype=2 get description,deviceid,volumename
      */
     private static final String CMD_WMI_ARGS = "logicaldisk where drivetype=2 get DeviceID,VolumeSerialNumber";
-    private static final String CMD_WMI_USB;
-
-    static {
-        CMD_WMI_USB = WMIC_PATH + " " + CMD_WMI_ARGS;
-    }
+    private static final String CMD_WMI_USB = WMIC_PATH + " " + CMD_WMI_ARGS;
 
     protected WindowsStorageDeviceDetector() {
         super();
