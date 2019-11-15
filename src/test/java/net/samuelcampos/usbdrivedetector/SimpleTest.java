@@ -26,7 +26,9 @@ public class SimpleTest implements IUSBDriveListener{
             e.printStackTrace();
         }
 
-        driveDetector.unmountStorageDevice(driveDetector.getRemovableDevices().get(0));
+        if (!driveDetector.getRemovableDevices().isEmpty()) {
+            driveDetector.unmountStorageDevice(driveDetector.getRemovableDevices().get(0));        	
+        }
 
         try {
             Thread.sleep(20000);
