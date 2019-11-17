@@ -13,7 +13,7 @@ To include this library in your project just use:
 <dependency>
     <groupId>net.samuelcampos</groupId>
     <artifactId>usbdrivedetector</artifactId>
-    <version>2.1.0</version>
+    <version>2.1.1</version>
 </dependency>
 ```
 
