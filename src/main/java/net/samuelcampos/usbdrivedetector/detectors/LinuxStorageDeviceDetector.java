@@ -83,7 +83,7 @@ public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
 
 
     @Override
-    public List<USBStorageDevice> getStorageDevicesDevices() {
+    public List<USBStorageDevice> getStorageDevices() {
         final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
         try (final CommandExecutor commandExecutor = new CommandExecutor(CMD_DF)){

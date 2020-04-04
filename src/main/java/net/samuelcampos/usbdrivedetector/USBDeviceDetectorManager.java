@@ -165,7 +165,7 @@ public class USBDeviceDetectorManager {
      * @return list of attached USB storage devices.
      */
     public List<USBStorageDevice> getRemovableDevices() {
-        return AbstractStorageDeviceDetector.getInstance().getStorageDevicesDevices();
+        return AbstractStorageDeviceDetector.getInstance().getStorageDevices();
     }
 
     public void unmountStorageDevice(USBStorageDevice usbStorageDevice) throws IOException {

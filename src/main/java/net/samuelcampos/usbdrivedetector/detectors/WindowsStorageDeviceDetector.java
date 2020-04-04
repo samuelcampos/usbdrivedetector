@@ -46,7 +46,7 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
     }
 
     @Override
-    public List<USBStorageDevice> getStorageDevicesDevices() {
+    public List<USBStorageDevice> getStorageDevices() {
         final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
         try (CommandExecutor commandExecutor = new CommandExecutor(CMD_WMI_USB)) {

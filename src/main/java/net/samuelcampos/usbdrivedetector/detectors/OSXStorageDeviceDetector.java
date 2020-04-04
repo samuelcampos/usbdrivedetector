@@ -73,7 +73,7 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
 
 
     @Override
-    public List<USBStorageDevice> getStorageDevicesDevices() {
+    public List<USBStorageDevice> getStorageDevices() {
         final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
         if (macosVersion >= MACOSX_MOUNTAINLION){
