@@ -79,21 +79,30 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
     }
 
     private String parseVolumeName(String[] parts) {
-    	String volumeLabel = "";
+    	StringBuilder volumeLabel = new StringBuilder();
     	// in our array of strings, the device ID will be at first position
     	// the volume serial number will be in the final position, and all 
     	// other elements in the array will either be empty string (multiple 
-    	// occurrences), or the volume label (zero or one occurrence)
+    	// occurrences), or parts of the volume label (if there is a volume 
+    	// label at all)
     	for (int i = 1; i < parts.length-1; i++) {
 			if (!parts[i].isEmpty())
 			{
-				volumeLabel = parts[i];
+				if (volumeLabel.length() > 0)
+				{
+					// if we had a previous word in our volume label, then the label 
+					// is made up of multiple white-space separate words => let's 
+					// add back in the required whitespace in the volume label
+					// between the word parts
+					volumeLabel.append(" ");
+				}
+				volumeLabel.append(parts[i]);
 			}
 		}
     	
     	// note: if there is NO label on the volume then none will be found in 
     	// the array and empty string will be returned
-		return volumeLabel;
+		return volumeLabel.toString();
 	}
 
 	private String getDeviceName(final String rootPath) {
