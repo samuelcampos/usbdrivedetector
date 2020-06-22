@@ -21,7 +21,7 @@ public class SimpleTest implements IUSBDriveListener{
         driveDetector.addDriveListener(sTest);
 
         try {
-            Thread.sleep(360000);
+            Thread.sleep(20000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
