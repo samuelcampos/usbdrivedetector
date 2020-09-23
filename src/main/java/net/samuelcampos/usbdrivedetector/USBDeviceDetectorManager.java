@@ -22,29 +22,34 @@ import net.samuelcampos.usbdrivedetector.events.IUSBDriveListener;
 import net.samuelcampos.usbdrivedetector.events.USBStorageEvent;
 import net.samuelcampos.usbdrivedetector.unmounters.AbstractStorageDeviceUnmounter;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author samuelcampos
  */
 @Slf4j
-public class USBDeviceDetectorManager {
+public class USBDeviceDetectorManager implements Closeable {
 
     /**
      * The default polling interval is 5 seconds
      */
-    private static final long DEFAULT_POLLING_INTERVAL = 5000;
+    private static final long DEFAULT_POLLING_INTERVAL_MILLIS = 5000;
 
     private final Set<USBStorageDevice> connectedDevices;
     private final List<IUSBDriveListener> listeners;
 
     private long currentPollingInterval;
-    private ListenerTask listenerTask;
-
+    private final ScheduledExecutorService taskExecutor;
+    private ScheduledFuture<?> listenerTaskFuture;
 
     public USBDeviceDetectorManager() {
-        this(DEFAULT_POLLING_INTERVAL);
+        this(DEFAULT_POLLING_INTERVAL_MILLIS);
     }
 
     /**
@@ -65,6 +70,8 @@ public class USBDeviceDetectorManager {
         connectedDevices = new HashSet<>();
 
         currentPollingInterval = pollingInterval;
+
+        taskExecutor = Executors.newSingleThreadScheduledExecutor();
     }
 
     /**
@@ -94,9 +101,8 @@ public class USBDeviceDetectorManager {
      * </p>
      */
     private synchronized void start() {
-        if (listenerTask == null) {
-            listenerTask = new ListenerTask(currentPollingInterval);
-            listenerTask.start();
+        if (listenerTaskFuture == null || listenerTaskFuture.isDone()) {
+            listenerTaskFuture = taskExecutor.scheduleAtFixedRate(new ListenerTask(), 0, currentPollingInterval, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -104,14 +110,9 @@ public class USBDeviceDetectorManager {
      * Forces the polling to stop, even if there are still listeners attached
      */
     private synchronized void stop() {
-        try {
-            if (listenerTask != null) {
-                listenerTask.interrupt();
-                listenerTask.join(2 * currentPollingInterval);
-                listenerTask = null;
-            }
-        } catch (InterruptedException e) {
-            log.error("Unable to with for 'listenerTask' to die.", e);
+        if (listenerTaskFuture != null) {
+            // If this task is currently running, it will not interrupt it
+            listenerTaskFuture.cancel(false);
         }
     }
 
@@ -225,39 +226,30 @@ public class USBDeviceDetectorManager {
         }
     }
 
-    private class ListenerTask extends Thread {
+    @Override
+    public void close() throws IOException {
+        taskExecutor.shutdown();
 
-        private final long pollingInterval;
-
-        public ListenerTask(final long pollingInterval) {
-            this.pollingInterval = pollingInterval;
-
-            setDaemon(true);
+        try {
+            taskExecutor.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            log.warn("Unable to wait for taskExecutor termination", e);
         }
+    }
+
+    private class ListenerTask implements Runnable {
 
         @Override
         public void run() {
             try {
-                while (!Thread.currentThread().isInterrupted()) {
-                    try {
-                        log.trace("Polling refresh task is running");
+                log.trace("Polling refresh task is running");
 
-                        List<USBStorageDevice> actualConnectedDevices = getRemovableDevices();
+                List<USBStorageDevice> actualConnectedDevices = getRemovableDevices();
 
-                        updateConnectedDevices(actualConnectedDevices);
-
-                    } catch (Exception e) {
-                        log.error("Error while refreshing device list", e);
-                    }
-
-                    sleep(pollingInterval);
-                }
-            } catch (InterruptedException ex) {
-            	if (!ex.getMessage().equalsIgnoreCase("sleep interrupted")) {
-                    log.error("Stopping polling thread", ex);
-            	}
+                updateConnectedDevices(actualConnectedDevices);
+            } catch (Exception e) {
+                log.error("Error while refreshing device list", e);
             }
         }
-
     }
 }
