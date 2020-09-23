@@ -80,7 +80,7 @@ public class CommandExecutor implements Closeable {
             int exitValue = process.waitFor();
 
             if (exitValue != 0) {
-                log.warn("Abnormal command '{}' terminantion. Exit value: {}", command, exitValue);
+                log.warn("Abnormal command '{}' termination. Exit value: {}", command, exitValue);
             }
         } catch (InterruptedException e) {
             log.error("Error while waiting for command '{}' to complete", command, e);

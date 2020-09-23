@@ -90,6 +90,11 @@ public class USBStorageDevice {
      * @return the name of the root of this device as it would be displayed in a system file browser.
      */
     public String getSystemDisplayName() {
-	    return FileSystemView.getFileSystemView().getSystemDisplayName(rootDirectory);
+    	String driveLetter = rootDirectory.getPath();
+    	if (driveLetter.endsWith("\\"))
+    	{
+    		driveLetter = driveLetter.substring(0, driveLetter.length()-1);
+    	}
+	    return deviceName + " (" + driveLetter + ")";
     }
 }

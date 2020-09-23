@@ -69,7 +69,7 @@ public abstract class AbstractStorageDeviceDetector {
      *
      * @return the list of the USB storage devices
      */
-    public abstract List<USBStorageDevice> getStorageDevicesDevices();
+    public abstract List<USBStorageDevice> getStorageDevices();
 
     static Optional<USBStorageDevice> getUSBDevice(final String rootPath) {
         return getUSBDevice(rootPath, null, null, null);
