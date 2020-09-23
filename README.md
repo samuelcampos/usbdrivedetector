@@ -32,6 +32,14 @@ driveDetector.addDriveListener(System.out::println);
 driveDetector.unmountStorageDevice(driveDetector.getRemovableDevices().get(0));
 ```
 
+Once you invoke `addDriveListener`, your application keep running because it will internally create an `ScheduledExecutorService`.
+To finish your application, just invoke the `close` method;
+
+```java
+    // Shutdown an initialized USBDeviceDetectorManager
+    driveDetector.close();
+```
+
 [travis-url]: https://travis-ci.org/samuelcampos/usbdrivedetector
 [travis-image]: https://travis-ci.org/samuelcampos/usbdrivedetector.svg?branch=master
 

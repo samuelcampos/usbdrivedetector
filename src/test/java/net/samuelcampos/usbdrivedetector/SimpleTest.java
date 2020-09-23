@@ -15,28 +15,24 @@ public class SimpleTest implements IUSBDriveListener{
 		USBDeviceDetectorManager driveDetector = new USBDeviceDetectorManager();
 
         driveDetector.getRemovableDevices().forEach(System.out::println);
-        
+
         SimpleTest sTest = new SimpleTest();
-        
+
         driveDetector.addDriveListener(sTest);
 
         try {
-            Thread.sleep(20000);
+            Thread.sleep(10000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
         if (!driveDetector.getRemovableDevices().isEmpty()) {
-            driveDetector.unmountStorageDevice(driveDetector.getRemovableDevices().get(0));        	
-        }
-
-        try {
-            Thread.sleep(20000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            driveDetector.unmountStorageDevice(driveDetector.getRemovableDevices().get(0));
         }
 
         System.out.println("Test finished");
+
+        driveDetector.close();
 	}
     
     private SimpleTest () {
