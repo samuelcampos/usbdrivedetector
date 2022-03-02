@@ -21,8 +21,8 @@ public class OSXStorageDeviceUnmounter extends LinuxAndOSXStorageDeviceUnmounter
 
     @Override
     public void unmount(final USBStorageDevice usbStorageDevice) {
-	unmount("diskutil unmountDisk " + usbStorageDevice.getDevice());
-    	unmount("sudo diskutil unmountDisk " + usbStorageDevice.getDevice());
+        unmount("diskutil unmountDisk " + usbStorageDevice.getRootDirectory());
+        unmount("sudo diskutil unmountDisk " + usbStorageDevice.getRootDirectory());
     }
 
 }
