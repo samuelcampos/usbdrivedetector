@@ -1,0 +1,72 @@
+name: Release USD Drive Detector
+
+on:
+  workflow_dispatch:
+    inputs:
+      branchName:
+        description: 'Name of the release branch'
+        required: true
+      reason:
+        description: 'Reason for release'
+        required: true
+
+jobs:
+  create-release-branch:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ '8' ]
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 100
+
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: ${{ matrix.java }}
+
+      - name: Setup Github User And Release Branch
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git checkout -b releases/${{ github.event.inputs.branchName }}
+          git push --set-upstream origin releases/${{ github.event.inputs.branchName }}
+
+      - name: Change Log
+        run: |
+          bash ${GITHUB_WORKSPACE}/.github/bashScripts/changelog.sh
+          git add ${GITHUB_WORKSPACE}/CHANGELOG.md
+          git commit -m "Updating change log on release branch ${{ github.event.inputs.branchName }}"
+          git push
+
+      - name: Cache local Maven repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-m2
+
+      - name: Prepare Release
+        run: mvn -B build-helper:parse-version release:prepare -DdevelopementVersion='${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}.0-SNAPSHOT' -Darguments="-DskipTests -Dusername=${{ github.actor }} -Dpassword=${{ github.token }}"
+
+      - name: Publish
+        run: |
+          mvn -B release:perform -Dusername=${{ github.actor }} -Dpassword=${{ github.token }} -Darguments="-DskipTests"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # has permissions to push package to this repo
+
+
+      - name: Tag latest and push
+        uses: akhilerm/tag-push-action@v1.1.0
+        with:
+          src: ${{ env.image_name }}:${{ env.release_version }}
+          dst: ${{ env.image_name }}:latest
+
+      - name: Create Release PR
+        run: |
+          git checkout releases/${{ github.event.inputs.branchName }}
+          hub pull-request -f -b main -m "Release ${{ github.event.inputs.branchName }}" -m "${{ github.event.inputs.reason }}"
