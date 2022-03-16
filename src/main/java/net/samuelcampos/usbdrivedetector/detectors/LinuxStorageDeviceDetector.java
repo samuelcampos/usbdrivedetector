@@ -18,6 +18,7 @@ package net.samuelcampos.usbdrivedetector.detectors;
 import lombok.extern.slf4j.Slf4j;
 import net.samuelcampos.usbdrivedetector.USBStorageDevice;
 import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
+import net.samuelcampos.usbdrivedetector.process.OutputProcessor;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,17 +46,17 @@ public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
 
     private static final String DISK_PREFIX = "/dev/";
 
-    protected LinuxStorageDeviceDetector() {
-        super();
+    protected LinuxStorageDeviceDetector(final CommandExecutor commandExecutor) {
+        super(commandExecutor);
     }
 
     private void readDiskInfo(final DiskInfo disk) {
 
         final String command = CMD_CHECK_USB + disk.getDevice();
 
-        try (final CommandExecutor commandExecutor = new CommandExecutor(command)) {
+        try (final OutputProcessor commandOutputProcessor = commandExecutor.executeCommand(command)) {
 
-            commandExecutor.processOutput(outputLine -> {
+            commandOutputProcessor.processOutput(outputLine -> {
 
                 final String[] parts = outputLine.split("=");
 
@@ -86,8 +87,8 @@ public class LinuxStorageDeviceDetector extends AbstractStorageDeviceDetector {
     public List<USBStorageDevice> getStorageDevices() {
         final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
-        try (final CommandExecutor commandExecutor = new CommandExecutor(CMD_DF)){
-            commandExecutor.processOutput((String outputLine) -> {
+        try (final OutputProcessor commandOutputProcessor = commandExecutor.executeCommand(CMD_DF)){
+            commandOutputProcessor.processOutput((String outputLine) -> {
                 final Matcher matcher = command1Pattern.matcher(outputLine);
 
                 if (matcher.matches()) {

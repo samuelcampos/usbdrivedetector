@@ -18,6 +18,7 @@ package net.samuelcampos.usbdrivedetector.detectors;
 import lombok.extern.slf4j.Slf4j;
 import net.samuelcampos.usbdrivedetector.USBStorageDevice;
 import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
+import net.samuelcampos.usbdrivedetector.process.OutputProcessor;
 import net.samuelcampos.usbdrivedetector.utils.OSUtils;
 
 import java.io.IOException;
@@ -39,8 +40,8 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
     private static final String CMD_SYSTEM_PROFILER_USB = "system_profiler SPUSBDataType";
     private static final Pattern macOSXPattern_MOUNT = Pattern.compile("^.*Mount Point: (.+)$");
 
-    private static final String CMD_DF = "df -l";
-    private static final String CMD_DISKUTIL = "diskutil info ";
+	private static final String CMD_DF = "df -l";
+	private static final String CMD_DISKUTIL = "diskutil info ";
 
     private static final String DISK_PREFIX = "/dev/disk";
 
@@ -54,8 +55,8 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
 
     private int macosVersion = -1;
 
-    protected OSXStorageDeviceDetector() {
-        super();
+    protected OSXStorageDeviceDetector(final CommandExecutor commandExecutor) {
+        super(commandExecutor);
 
         final String version = OSUtils.getOsVersion();
         final String[] versionParts = version.split("\\.");
@@ -77,9 +78,9 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
         final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
         if (macosVersion >= MACOSX_MOUNTAINLION){
-        	try (final CommandExecutor commandExecutor = new CommandExecutor(CMD_DF)) {
+        	try (final OutputProcessor commandOutputProcessor = commandExecutor.executeCommand(CMD_DF)) {
 
-        		commandExecutor.processOutput((String outputLine) -> {
+				commandOutputProcessor.processOutput((String outputLine) -> {
 					final String[] parts = outputLine.split("\\s");
 					final String device = parts[0];
 
@@ -99,8 +100,8 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
         	}
         }
         else{
-        	try (final CommandExecutor commandExecutor = new CommandExecutor(CMD_SYSTEM_PROFILER_USB)) {
-        		commandExecutor.processOutput(outputLine -> {
+        	try (final OutputProcessor commandOutputProcessor = commandExecutor.executeCommand(CMD_SYSTEM_PROFILER_USB)) {
+				commandOutputProcessor.processOutput(outputLine -> {
         			final Matcher matcher = macOSXPattern_MOUNT.matcher(outputLine);
 
         			if (matcher.matches()) {
@@ -123,9 +124,9 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
 		final DiskInfo disk = new DiskInfo(device);
 		final String command = CMD_DISKUTIL +  disk.getDevice();
 
-		try (final CommandExecutor commandExecutor = new CommandExecutor(command)) {
+		try (final OutputProcessor commandOutputProcessor = commandExecutor.executeCommand(command)) {
 
-    		commandExecutor.processOutput(outputLine -> {
+			commandOutputProcessor.processOutput(outputLine -> {
 
     			final String[] parts = outputLine.split(":");
 

@@ -87,7 +87,7 @@ public class USBDeviceDetectorManager implements Closeable {
 
         currentPollingInterval = pollingInterval;
 
-        if (listeners.size() > 0) {
+        if (!listeners.isEmpty()) {
             stop();
             start();
         }

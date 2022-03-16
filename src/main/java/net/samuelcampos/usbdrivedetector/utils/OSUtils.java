@@ -21,10 +21,9 @@ import static net.samuelcampos.usbdrivedetector.utils.OSType.*;
 
 @UtilityClass
 public final class OSUtils {
-    public static final String OS_NAME = System.getProperty("os.name");
 
     public static OSType getOsType() {
-        String osNameLower = OS_NAME.toLowerCase();
+        String osNameLower = System.getProperty("os.name").toLowerCase();
 
         if (osNameLower.startsWith("win")) {
             return WINDOWS;

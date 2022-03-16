@@ -15,16 +15,16 @@
  */
 package net.samuelcampos.usbdrivedetector.detectors;
 
+import lombok.extern.slf4j.Slf4j;
+import net.samuelcampos.usbdrivedetector.USBStorageDevice;
+import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
+import net.samuelcampos.usbdrivedetector.process.OutputProcessor;
+
+import javax.swing.filechooser.FileSystemView;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.filechooser.FileSystemView;
-
-import lombok.extern.slf4j.Slf4j;
-import net.samuelcampos.usbdrivedetector.USBStorageDevice;
-import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
 
 /**
  *
@@ -41,16 +41,16 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
     private static final String CMD_WMI_ARGS = "logicaldisk where drivetype=2 get DeviceID,VolumeSerialNumber,VolumeName";
     private static final String CMD_WMI_USB = WMIC_PATH + " " + CMD_WMI_ARGS;
 
-    protected WindowsStorageDeviceDetector() {
-        super();
+    protected WindowsStorageDeviceDetector(final CommandExecutor commandExecutor) {
+        super(commandExecutor);
     }
 
     @Override
     public List<USBStorageDevice> getStorageDevices() {
         final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
-        try (CommandExecutor commandExecutor = new CommandExecutor(CMD_WMI_USB)) {
-            commandExecutor.processOutput(outputLine -> {
+        try (final OutputProcessor commandOutputProcessor = commandExecutor.executeCommand(CMD_WMI_USB)) {
+            commandOutputProcessor.processOutput(outputLine -> {
 
         	final String[] parts = outputLine.split(" ");
 
@@ -90,8 +90,8 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
 			{
 				if (volumeLabel.length() > 0)
 				{
-					// if we had a previous word in our volume label, then the label 
-					// is made up of multiple white-space separate words => let's 
+					// if we had a previous word in our volume label, then the label
+					// is made up of multiple white-space separate words => let's
 					// add back in the required whitespace in the volume label
 					// between the word parts
 					volumeLabel.append(" ");
@@ -99,8 +99,8 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
 				volumeLabel.append(parts[i]);
 			}
 		}
-    	
-    	// note: if there is NO label on the volume then none will be found in 
+
+    	// note: if there is NO label on the volume then none will be found in
     	// the array and empty string will be returned
 		return volumeLabel.toString();
 	}
