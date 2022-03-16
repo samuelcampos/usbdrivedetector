@@ -69,4 +69,4 @@ jobs:
       - name: Create Release PR
         run: |
           git checkout releases/${{ github.event.inputs.branchName }}
-          hub pull-request -f -b main -m "Release ${{ github.event.inputs.branchName }}" -m "${{ github.event.inputs.reason }}"
+          hub pull-request -f -b master -m "Release ${{ github.event.inputs.branchName }}" -m "${{ github.event.inputs.reason }}"
