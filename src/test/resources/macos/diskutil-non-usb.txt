@@ -1,0 +1,48 @@
+   Device Identifier:         disk1s5
+   Device Node:               /dev/disk1s5
+   Whole:                     No
+   Part of Whole:             disk1
+
+   Volume Name:               OSX
+   Mounted:                   Yes
+   Mount Point:               /
+
+   Partition Type:            41504653-0000-11AA-AA11-00306543ECAC
+   File System Personality:   APFS
+   Type (Bundle):             apfs
+   Name (User Visible):       APFS
+   Owners:                    Enabled
+
+   OS Can Be Installed:       No
+   Booter Disk:               disk1s2
+   Recovery Disk:             disk1s3
+   Media Type:                Generic
+   Protocol:                  SATA
+   SMART Status:              Verified
+   Volume UUID:               9FF950AF-95FF-4FA3-A7A1-4EF3F437A17F
+   Disk / Partition UUID:     9FF950AF-95FF-4FA3-A7A1-4EF3F437A17F
+
+   Disk Size:                 250.8 GB (250790436864 Bytes) (exactly 489825072 512-Byte-Units)
+   Device Block Size:         4096 Bytes
+
+   Container Total Space:     250.8 GB (250790436864 Bytes) (exactly 489825072 512-Byte-Units)
+   Container Free Space:      17.0 GB (17020043264 Bytes) (exactly 33242272 512-Byte-Units)
+   Allocation Block Size:     4096 Bytes
+
+   Read-Only Media:           No
+   Read-Only Volume:          Yes
+
+   Device Location:           Internal
+   Removable Media:           Fixed
+
+   Solid State:               Yes
+   Hardware AES Support:      No
+
+   This disk is an APFS Volume.  APFS Information:
+   APFS Container:            disk1
+   APFS Physical Store:       disk0s2
+   Fusion Drive:              No
+   APFS Volume Group:         015FD852-60E4-39DF-9DA3-EFF590D7C8EE
+   FileVault:                 No
+   Locked:                    No
+

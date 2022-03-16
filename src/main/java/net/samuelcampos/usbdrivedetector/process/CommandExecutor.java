@@ -17,84 +17,23 @@ package net.samuelcampos.usbdrivedetector.process;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.*;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
+import java.io.IOException;
 
 /**
  *
  * @author samuelcampos
  */
 @Slf4j
-public class CommandExecutor implements Closeable {
+public class CommandExecutor {
 
-    private final String command;
-    private final BufferedReader input;
-    private final Process process;
-
-    public CommandExecutor(final String command) throws IOException {
+    public OutputProcessor executeCommand(final String command) throws IOException {
         if (log.isTraceEnabled()) {
             log.trace("Running command: {}", command);
         }
 
-        this.command = command;
-        this.process = Runtime.getRuntime().exec(command);
-        this.input = new BufferedReader(new InputStreamReader(process.getInputStream()));
-    }
+        Process process = Runtime.getRuntime().exec(command);
 
-    public void processOutput(final Consumer<String> method) throws IOException{
-        String outputLine;
-        while ((outputLine = this.readOutputLine()) != null) {
-            method.accept(outputLine);
-        }
-    }
-
-    public boolean checkOutput(final Predicate<String> method) throws IOException{
-        String outputLine;
-        while ((outputLine = this.readOutputLine()) != null) {
-            if (method.test(outputLine)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private String readOutputLine() throws IOException {
-        if(input == null) {
-            throw new IllegalStateException("You need to call 'executeCommand' method first");
-        }
-        
-         final String outputLine = input.readLine();
-         
-         if(outputLine != null) {
-             return outputLine.trim();
-         }
-         
-         return null;
-    }
-
-    @Override
-    public void close() throws IOException {
-        try {
-            int exitValue = process.waitFor();
-
-            if (exitValue != 0) {
-                log.warn("Abnormal command '{}' termination. Exit value: {}", command, exitValue);
-            }
-        } catch (InterruptedException e) {
-            log.error("Error while waiting for command '{}' to complete", command, e);
-        }
-
-        if (input != null) {
-            try {
-                input.close();
-            } catch (IOException e) {
-                log.error(e.getMessage(), e);
-            }
-        }
-
-        process.destroy();
+        return new CommandOutputProcessor(command, process);
     }
 
 }

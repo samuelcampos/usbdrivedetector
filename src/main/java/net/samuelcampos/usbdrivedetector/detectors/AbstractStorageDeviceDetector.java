@@ -15,8 +15,11 @@
  */
 package net.samuelcampos.usbdrivedetector.detectors;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.samuelcampos.usbdrivedetector.USBStorageDevice;
+import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
 import net.samuelcampos.usbdrivedetector.utils.OSUtils;
 
 import java.io.File;
@@ -33,6 +36,8 @@ import java.util.Optional;
  * @author samuelcampos
  */
 @Slf4j
+@Getter
+@RequiredArgsConstructor
 public abstract class AbstractStorageDeviceDetector {
 
     /**
@@ -43,17 +48,19 @@ public abstract class AbstractStorageDeviceDetector {
 
     public static synchronized AbstractStorageDeviceDetector getInstance() {
         if (instance == null) {
+            final CommandExecutor commandExecutor = new CommandExecutor();
+
             switch (OSUtils.getOsType()) {
                 case WINDOWS:
-                    instance = new WindowsStorageDeviceDetector();
+                    instance = new WindowsStorageDeviceDetector(commandExecutor);
                     break;
 
                 case LINUX:
-                    instance = new LinuxStorageDeviceDetector();
+                    instance = new LinuxStorageDeviceDetector(commandExecutor);
                     break;
 
                 case MAC_OS:
-                    instance = new OSXStorageDeviceDetector();
+                    instance = new OSXStorageDeviceDetector(commandExecutor);
                     break;
             }
         }
@@ -61,8 +68,7 @@ public abstract class AbstractStorageDeviceDetector {
         return instance;
     }
 
-    protected AbstractStorageDeviceDetector() {
-    }
+    protected final CommandExecutor commandExecutor;
 
     /**
      * Returns the all storage devices currently connected to the computer.
