@@ -1,20 +1,32 @@
 # USB Drive Detector
 
-[![Build Status][travis-image]][travis-url]  |
 [![version][maven-version]][maven-url]
 
 A Java library to get a list of all usb storage devices connected to the computer and has the capability of unmount them. It works on the three main operating systems (Windows, Linux and OS X).
 
 ### Maven dependency
 
-To include this library in your project just use:
+To include this library in your project, add the following on your `pom.xml`:
 
 ```xml
-<dependency>
-    <groupId>net.samuelcampos</groupId>
-    <artifactId>usbdrivedetector</artifactId>
-    <version>2.1.2</version>
-</dependency>
+<project>
+    <dependencies>
+        <!-- New dependency -->
+        <dependency>
+            <groupId>net.samuelcampos</groupId>
+            <artifactId>usbdrivedetector</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+    </dependencies>
+    
+    <repositories>
+        <!-- New Maven repo -->
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/samuelcampos/usbdrivedetector</url>
+        </repository>
+    </repositories>
+</project>
 ```
 
 ### Usage examples
@@ -39,9 +51,6 @@ To finish your application, just invoke the `close` method;
     // Shutdown an initialized USBDeviceDetectorManager
     driveDetector.close();
 ```
-
-[travis-url]: https://travis-ci.org/samuelcampos/usbdrivedetector
-[travis-image]: https://travis-ci.org/samuelcampos/usbdrivedetector.svg?branch=master
 
 [maven-url]: https://search.maven.org/artifact/net.samuelcampos/usbdrivedetector/
 [maven-version]: https://img.shields.io/maven-central/v/net.samuelcampos/usbdrivedetector.svg?style=flat

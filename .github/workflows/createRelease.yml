@@ -59,13 +59,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # has permissions to push package to this repo
 
-
-      - name: Tag latest and push
-        uses: akhilerm/tag-push-action@v1.1.0
-        with:
-          src: ${{ env.image_name }}:${{ env.release_version }}
-          dst: ${{ env.image_name }}:latest
-
       - name: Create Release PR
         run: |
           git checkout releases/${{ github.event.inputs.branchName }}
