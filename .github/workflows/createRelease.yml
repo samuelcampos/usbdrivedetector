@@ -3,9 +3,6 @@ name: Release USD Drive Detector
 on:
   workflow_dispatch:
     inputs:
-      branchName:
-        description: 'Name of the release branch'
-        required: true
       reason:
         description: 'Reason for release'
         required: true
@@ -30,16 +27,14 @@ jobs:
 
       - name: Setup Github User And Release Branch
         run: |
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git checkout -b releases/${{ github.event.inputs.branchName }}
-          git push --set-upstream origin releases/${{ github.event.inputs.branchName }}
+          git config --local user.email "release-bot@users.noreply.github.com"
+          git config --local user.name "release-bot"
 
       - name: Change Log
         run: |
           bash ${GITHUB_WORKSPACE}/.github/bashScripts/changelog.sh
           git add ${GITHUB_WORKSPACE}/CHANGELOG.md
-          git commit -m "Updating change log on release branch ${{ github.event.inputs.branchName }}"
+          git commit -m "Updating change log on release branch"
           git push
 
       - name: Cache local Maven repository
@@ -58,8 +53,3 @@ jobs:
           mvn -B release:perform -Dusername=${{ github.actor }} -Dpassword=${{ github.token }} -Darguments="-DskipTests"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # has permissions to push package to this repo
-
-      - name: Create Release PR
-        run: |
-          git checkout releases/${{ github.event.inputs.branchName }}
-          hub pull-request -f -b master -m "Release ${{ github.event.inputs.branchName }}" -m "${{ github.event.inputs.reason }}"
