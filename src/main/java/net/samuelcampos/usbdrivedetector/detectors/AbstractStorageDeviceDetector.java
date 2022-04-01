@@ -52,7 +52,7 @@ public abstract class AbstractStorageDeviceDetector {
 
             switch (OSUtils.getOsType()) {
                 case WINDOWS:
-                    instance = new WindowsStorageDeviceDetector(commandExecutor);
+                    instance = new WindowsStorageDeviceDetector(System.getenv("WINDIR"), commandExecutor);
                     break;
 
                 case LINUX:
@@ -83,12 +83,6 @@ public abstract class AbstractStorageDeviceDetector {
 
     static Optional<USBStorageDevice> getUSBDevice(final String rootPath, final String deviceName, final String device, final String uuid) {
         final File root = new File(rootPath);
-
-        if (!root.isDirectory()) {
-            // When a device has recently disconnected, the command may still return the old root directory of the recently removed device
-            log.trace("Invalid root found: {}", root);
-            return Optional.empty();
-        }
 
         log.trace("Device found: {}", root.getPath());
 

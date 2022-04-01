@@ -1,0 +1,2 @@
+DeviceID  VolumeName  VolumeSerialNumber
+.                    3029A30E
