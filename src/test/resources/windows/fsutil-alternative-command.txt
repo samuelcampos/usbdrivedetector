@@ -1,0 +1,19 @@
+> fsutil fsInfo drives
+
+Drives: C:\ E:\
+
+
+> fsutil fsInfo driveType E:
+E: - Removable Drive
+
+fsutil fsInfo volumeInfo E:
+Volume Name :
+Volume Serial Number : 0x3029a28e
+Max Component Length : 255
+File System Name : FAT32
+Is ReadWrite
+Not Thinly-Provisioned
+Preserves Case of filenames
+Supports Unicode in filenames
+Returns Handle Close Result Information
+Supports Encrypted File System

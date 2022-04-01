@@ -33,23 +33,29 @@ import java.util.List;
 @Slf4j
 public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector {
 
-    private static final String WMIC_PATH = System.getenv("WINDIR") + "\\System32\\wbem\\wmic.exe";
+    private static final String WMIC_PATH = "\\System32\\wbem\\wmic.exe";
 
     /**
      * wmic logicaldisk where drivetype=2 get description,deviceid,volumename
      */
     private static final String CMD_WMI_ARGS = "logicaldisk where drivetype=2 get DeviceID,VolumeSerialNumber,VolumeName";
-    private static final String CMD_WMI_USB = WMIC_PATH + " " + CMD_WMI_ARGS;
 
-    protected WindowsStorageDeviceDetector(final CommandExecutor commandExecutor) {
+    private final String winDir;
+
+    protected WindowsStorageDeviceDetector(final String winDir, final CommandExecutor commandExecutor) {
         super(commandExecutor);
+        this.winDir = winDir;
+    }
+
+    private String getWmicCommand() {
+        return winDir + WMIC_PATH + " " + CMD_WMI_ARGS;
     }
 
     @Override
     public List<USBStorageDevice> getStorageDevices() {
         final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
-        try (final OutputProcessor commandOutputProcessor = commandExecutor.executeCommand(CMD_WMI_USB)) {
+        try (final OutputProcessor commandOutputProcessor = commandExecutor.executeCommand(getWmicCommand())) {
             commandOutputProcessor.processOutput(outputLine -> {
 
         	final String[] parts = outputLine.split(" ");
@@ -110,6 +116,7 @@ public class WindowsStorageDeviceDetector extends AbstractStorageDeviceDetector 
         final FileSystemView v = FileSystemView.getFileSystemView();
         String name = v.getSystemDisplayName(f);
 
+        // Remove the " (E:)" from the name
         if (name != null) {
             int idx = name.lastIndexOf('(');
             if (idx != -1) {
