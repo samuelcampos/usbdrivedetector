@@ -75,6 +75,24 @@ public class USBDeviceDetectorManager implements Closeable {
     }
 
     /**
+     * Creates a new USBDeviceDetectorManager
+     * <p>
+     * The polling interval is used as the update frequency for any attached
+     * listeners. Instead of automatic OS detection a custom StorageDeviceDetector will be used for polling.
+     * </p>
+     * <p>
+     * Polling doesn't happen until at least one listener is attached.
+     * </p>
+     * @param pollingInterval the interval in milliseconds to poll for the USB
+     *                        storage devices on the system.
+     * @param customDeviceDetector the device detector to use
+     */
+    public USBDeviceDetectorManager(final long pollingInterval, AbstractStorageDeviceDetector customDeviceDetector) {
+        this(pollingInterval);
+        AbstractStorageDeviceDetector.setInstance(customDeviceDetector);
+    }
+
+    /**
      * Sets the polling interval
      *
      * @param pollingInterval the interval in milliseconds to poll for the USB
