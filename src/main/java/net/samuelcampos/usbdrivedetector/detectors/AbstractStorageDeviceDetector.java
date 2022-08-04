@@ -46,6 +46,10 @@ public abstract class AbstractStorageDeviceDetector {
      */
     private static AbstractStorageDeviceDetector instance;
 
+    public static synchronized void setInstance(AbstractStorageDeviceDetector customInstance) {
+        instance = customInstance;
+    }
+
     public static synchronized AbstractStorageDeviceDetector getInstance() {
         if (instance == null) {
             final CommandExecutor commandExecutor = new CommandExecutor();
