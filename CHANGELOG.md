@@ -1,3 +1,4 @@
+
 ## Version 2.2.0
 
 - Update release job
@@ -19,7 +20,3 @@
 - Fix minor concurrency issue; Enhance error logs
 - Reduce pooling watch interval and refactor some code
 - Prepare next iteration cycle
-
-
-
-

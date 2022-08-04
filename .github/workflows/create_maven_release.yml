@@ -51,14 +51,18 @@ jobs:
           cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import
 
       - name: Prepare Release
-        run: mvn -B build-helper:parse-version release:prepare -DdevelopementVersion='${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}.0-SNAPSHOT' -Darguments="-DskipTests -Dusername=${{ github.actor }} -Dpassword=${{ github.token }}"
+        run: |
+          mvn -B build-helper:parse-version release:prepare \
+          -DdevelopementVersion='${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}.0-SNAPSHOT' \
+          -Darguments="-DskipTests -Dusername=${{ github.actor }} -Dpassword=${{ github.token }}"
 
       - name: Publish
         run: |
-          mvn -B -P gpg_verify \
-            --no-transfer-progress \
-            --batch-mode -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} \
-            --file pom.xml -s release/m2-settings.xml \
-            release:perform -Dusername=${{ github.actor }} -Dpassword=${{ github.token }} -Darguments="-DskipTests"
+          mvn -B --no-transfer-progress \
+          --file pom.xml -s release/m2-settings.xml \
+          release:perform -Dusername=${{ github.actor }} -Dpassword=${{ github.token }} -Darguments="-DskipTests" \
+          -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} \
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # has permissions to push package to this repo
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
