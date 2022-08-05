@@ -15,17 +15,9 @@ To include this library in your project, add the following on your `pom.xml`:
         <dependency>
             <groupId>net.samuelcampos</groupId>
             <artifactId>usbdrivedetector</artifactId>
-            <version>2.2.0</version>
+            <version>2.2.1</version>
         </dependency>
     </dependencies>
-    
-    <repositories>
-        <!-- New Maven repo -->
-        <repository>
-            <id>github</id>
-            <url>https://maven.pkg.github.com/samuelcampos/usbdrivedetector</url>
-        </repository>
-    </repositories>
 </project>
 ```
 
