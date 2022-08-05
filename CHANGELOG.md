@@ -1,3 +1,14 @@
+## Version 2.2.1
+
+- Refactor GitHub release workflow
+- Updating change log on release branch
+- Publish release to Maven Central
+- allow using a custom StorageDeviceDetector class optional
+- Add Windows tests (#40)
+- [maven-release-plugin] prepare for next development iteration
+
+
+
 
 ## Version 2.2.0
 
