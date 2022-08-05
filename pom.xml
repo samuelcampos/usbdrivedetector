@@ -92,6 +92,7 @@
 
     <scm>
         <developerConnection>scm:git:https://github.com/samuelcampos/usbdrivedetector.git</developerConnection>
+        <url>https://github.com/samuelcampos/usbdrivedetector/</url>
         <tag>HEAD</tag>
     </scm>
 

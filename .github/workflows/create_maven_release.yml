@@ -15,15 +15,23 @@ jobs:
         java: [ '8' ]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 100
 
       - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           distribution: 'adopt'
           java-version: ${{ matrix.java }}
+          cache: 'maven'
+          # Properties for deployment to OSSRH:
+          server-id: ossrh
+          server-username: OSSRH_USERNAME
+          server-password: OSSRH_PASSWORD
+          # Properties for gpg signing:
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: GPG_PASSPHRASE
 
       - name: Setup Github User And Release Branch
         run: |
@@ -37,32 +45,17 @@ jobs:
           git commit -m "Updating change log on release branch"
           git push
 
-      - name: Cache local Maven repository
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-m2
-
-      - id: install-secret-key
-        name: Install GPG secret key
-        run: |
-          cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import
-
       - name: Prepare Release
         run: |
-          mvn -B build-helper:parse-version release:prepare \
+          mvn --batch-mode build-helper:parse-version release:prepare \
           -DdevelopementVersion='${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}.0-SNAPSHOT' \
           -Darguments="-DskipTests -Dusername=${{ github.actor }} -Dpassword=${{ github.token }}"
 
       - name: Publish
         run: |
-          mvn -B --no-transfer-progress \
-          --file pom.xml -s release/m2-settings.xml \
-          release:perform -Dusername=${{ github.actor }} -Dpassword=${{ github.token }} -Darguments="-DskipTests" \
-          -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} \
+          mvn --batch-mode --no-transfer-progress \
+          release:perform -Dusername=${{ github.actor }} -Dpassword=${{ github.token }} -Darguments="-DskipTests"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # has permissions to push package to this repo
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
