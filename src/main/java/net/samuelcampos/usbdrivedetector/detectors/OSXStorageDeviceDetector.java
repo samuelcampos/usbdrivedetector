@@ -77,42 +77,18 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
     public List<USBStorageDevice> getStorageDevices() {
         final ArrayList<USBStorageDevice> listDevices = new ArrayList<>();
 
-        if (macosVersion >= MACOSX_MOUNTAINLION){
-        	try (final OutputProcessor commandOutputProcessor = commandExecutor.executeCommand(CMD_DF)) {
+        try (final OutputProcessor commandOutputProcessor = commandExecutor.executeCommand(CMD_SYSTEM_PROFILER_USB)) {
+        	commandOutputProcessor.processOutput(outputLine -> {
+        		final Matcher matcher = macOSXPattern_MOUNT.matcher(outputLine);
 
-				commandOutputProcessor.processOutput((String outputLine) -> {
-					final String[] parts = outputLine.split("\\s");
-					final String device = parts[0];
+        		if (matcher.matches()) {
+        			getUSBDevice(matcher.group(1))
+        			.ifPresent(listDevices::add);
+        		}
+        	});
 
-                    if (device.startsWith(DISK_PREFIX)) {
-                    	final DiskInfo disk = getDiskInfo(device);
-
-                    	if (disk.isUSB()) {
-							getUSBDevice(disk.getMountPoint(), disk.getName(), disk.getDevice(), disk.getUuid())
-									.ifPresent(listDevices::add);
-                    	}
-                    }
-
-        		});
-
-        	} catch (IOException e) {
-        		log.error(e.getMessage(), e);
-        	}
-        }
-        else{
-        	try (final OutputProcessor commandOutputProcessor = commandExecutor.executeCommand(CMD_SYSTEM_PROFILER_USB)) {
-				commandOutputProcessor.processOutput(outputLine -> {
-        			final Matcher matcher = macOSXPattern_MOUNT.matcher(outputLine);
-
-        			if (matcher.matches()) {
-						getUSBDevice(matcher.group(1))
-								.ifPresent(listDevices::add);
-        			}
-        		});
-
-        	} catch (IOException e) {
-        		log.error(e.getMessage(), e);
-        	}
+        } catch (IOException e) {
+        	log.error(e.getMessage(), e);
         }
 
         return listDevices;
