@@ -63,7 +63,7 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
 
         if (versionParts.length > 1) {
         	try{
-        		macosVersion = Integer.parseInt(versionParts[1]);
+        		macosVersion = Integer.parseInt(versionParts[0]);
         	}
         	catch (NumberFormatException nfe) {
         		log.error(nfe.getMessage(), nfe);
@@ -99,7 +99,7 @@ public class OSXStorageDeviceDetector extends AbstractStorageDeviceDetector {
         		log.error(e.getMessage(), e);
         	}
         }
-        else{
+        else {
         	try (final OutputProcessor commandOutputProcessor = commandExecutor.executeCommand(CMD_SYSTEM_PROFILER_USB)) {
 				commandOutputProcessor.processOutput(outputLine -> {
         			final Matcher matcher = macOSXPattern_MOUNT.matcher(outputLine);

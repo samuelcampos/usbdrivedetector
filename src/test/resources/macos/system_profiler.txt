@@ -1,0 +1,17 @@
+USB:
+
+    USB 3.1 Bus:
+
+      Host Controller Driver: AppleUSBXHCITR
+      PCI Device ID: 0x15ec
+      PCI Revision ID: 0x0006
+      PCI Vendor ID: 0x8086
+      Bus Number: 0x00
+
+    USB 3.1 Bus:
+
+      Host Controller Driver: AppleUSBXHCITR
+      PCI Device ID: 0x15ec
+      PCI Revision ID: 0x0006
+      PCI Vendor ID: 0x8086
+      Bus Number: 0x01
