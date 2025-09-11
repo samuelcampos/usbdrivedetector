@@ -1,43 +1,46 @@
 package net.samuelcampos.usbdrivedetector.detectors;
 
+import com.sun.jna.platform.win32.Kernel32;
+import com.sun.jna.platform.win32.WinBase;
+import com.sun.jna.ptr.IntByReference;
 import net.samuelcampos.usbdrivedetector.USBStorageDevice;
 import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
-import net.samuelcampos.usbdrivedetector.process.InputStreamProcessor;
-import net.samuelcampos.usbdrivedetector.utils.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.internal.matchers.Contains;
 
-import javax.swing.filechooser.FileSystemView;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class WindowsStorageDeviceDetectorTest {
 
-    CommandExecutor commandExecutor;
+    private static final int SEM_FAILCRITICALERRORS = 0x0001;
+
+    Kernel32 kernel32;
     WindowsStorageDeviceDetector victim;
+
+    // A real root (e.g. "C:\" on Windows, "/" elsewhere) is used to emulate a removable drive,
+    // because USBStorageDevice requires the root directory to exist.
+    String rootPath;
 
     @BeforeEach
     public void beforeEach() {
-        commandExecutor = mock(CommandExecutor.class);
-
-        //System.setenv("WINDIR");
-        victim = new WindowsStorageDeviceDetector("C:\\WINDOWS", commandExecutor);
+        kernel32 = mock(Kernel32.class);
+        victim = new WindowsStorageDeviceDetector(mock(CommandExecutor.class), kernel32);
+        rootPath = File.listRoots()[0].getAbsolutePath();
     }
 
     @Test
-    public void testGetStorageDevicesWithoutRemovableDevices() throws IOException {
+    public void testGetStorageDevicesWithoutRemovableDevices() {
         // given
-        when(commandExecutor.executeCommand(argThat(new Contains("wmic"))))
-                .thenAnswer(ignore -> new InputStreamProcessor(TestUtils.getInputStreamClassPath("windows/wmic-empty.txt")));
+        when(kernel32.GetDriveType(anyString())).thenReturn(WinBase.DRIVE_FIXED);
 
         // when
         List<USBStorageDevice> devicesList = victim.getStorageDevices();
@@ -45,35 +48,63 @@ public class WindowsStorageDeviceDetectorTest {
         // then
         assertTrue(devicesList.isEmpty());
 
-        verify(commandExecutor, times(1)).executeCommand("C:\\WINDOWS\\System32\\wbem\\wmic.exe logicaldisk where drivetype=2 get DeviceID,VolumeSerialNumber,VolumeName");
+        verify(kernel32, never()).GetVolumeInformation(anyString(), any(), anyInt(), any(), any(), any(), any(), anyInt());
     }
 
-
     @Test
-    public void testGetStorageDevices() throws IOException {
+    public void testGetStorageDevices() {
         // given
-        String systemDrive = System.getenv("SystemDrive"); // The system drive is used to emulate a removable drive
-        File systemDriveFile = new File(systemDrive + File.separatorChar);
-
-        when(commandExecutor.executeCommand(argThat(new Contains("wmic"))))
-                //.thenAnswer(ignore -> new InputStreamProcessor(TestUtils.getInputStreamClassPath("windows/wmic.txt")));
-                .thenAnswer(ignore -> new InputStreamProcessor(new ByteArrayInputStream(
-                        ("DeviceID  VolumeName  VolumeSerialNumber\n" +
-                        systemDrive + "                    3029A30E").getBytes(StandardCharsets.UTF_8)
-                )));
+        when(kernel32.GetDriveType(rootPath)).thenReturn(WinBase.DRIVE_REMOVABLE);
+        mockVolumeInformation("MY USB", 0x3029A30E);
 
         // when
         List<USBStorageDevice> devicesList = victim.getStorageDevices();
 
         // then
         assertEquals(1, devicesList.size());
-        assertEquals(systemDriveFile.getPath(), devicesList.get(0).getRootDirectory().getPath());
-        assertTrue(FileSystemView.getFileSystemView().getSystemDisplayName(systemDriveFile).startsWith(devicesList.get(0).getDeviceName()));
-        assertEquals(systemDriveFile.getPath(), devicesList.get(0).getDevice());
+        assertEquals(new File(rootPath).getPath(), devicesList.get(0).getRootDirectory().getPath());
+        assertEquals("MY USB", devicesList.get(0).getDeviceName());
+        assertEquals(rootPath, devicesList.get(0).getDevice());
         assertEquals("3029A30E", devicesList.get(0).getUuid());
+    }
 
+    @Test
+    public void testGetStorageDevicesWhenVolumeInformationFails() {
+        // given
+        when(kernel32.GetDriveType(rootPath)).thenReturn(WinBase.DRIVE_REMOVABLE);
+        when(kernel32.GetVolumeInformation(eq(rootPath), any(), anyInt(), any(), any(), any(), any(), anyInt()))
+                .thenReturn(false);
 
-        verify(commandExecutor, times(1)).executeCommand("C:\\WINDOWS\\System32\\wbem\\wmic.exe logicaldisk where drivetype=2 get DeviceID,VolumeSerialNumber,VolumeName");
+        // when
+        List<USBStorageDevice> devicesList = victim.getStorageDevices();
+
+        // then
+        assertTrue(devicesList.isEmpty());
+    }
+
+    @Test
+    public void testGetStorageDevicesSuppressesAndRestoresCriticalErrorDialogs() {
+        // given
+        final int previousErrorMode = 0x8000;
+        when(kernel32.SetErrorMode(SEM_FAILCRITICALERRORS)).thenReturn(previousErrorMode);
+        when(kernel32.GetDriveType(anyString())).thenReturn(WinBase.DRIVE_FIXED);
+
+        // when
+        victim.getStorageDevices();
+
+        // then
+        verify(kernel32).SetErrorMode(previousErrorMode | SEM_FAILCRITICALERRORS);
+        verify(kernel32).SetErrorMode(previousErrorMode);
+    }
+
+    private void mockVolumeInformation(final String volumeName, final int serialNumber) {
+        when(kernel32.GetVolumeInformation(eq(rootPath), any(), anyInt(), any(), any(), any(), any(), anyInt()))
+                .thenAnswer(invocation -> {
+                    final char[] volumeNameBuffer = invocation.getArgument(1);
+                    System.arraycopy(volumeName.toCharArray(), 0, volumeNameBuffer, 0, volumeName.length());
+                    invocation.<IntByReference>getArgument(3).setValue(serialNumber);
+                    return true;
+                });
     }
 
 }

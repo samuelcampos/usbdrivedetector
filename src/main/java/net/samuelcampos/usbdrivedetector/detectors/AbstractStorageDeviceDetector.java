@@ -15,6 +15,7 @@
  */
 package net.samuelcampos.usbdrivedetector.detectors;
 
+import com.sun.jna.platform.win32.Kernel32;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +57,7 @@ public abstract class AbstractStorageDeviceDetector {
 
             switch (OSUtils.getOsType()) {
                 case WINDOWS:
-                    instance = new WindowsStorageDeviceDetector(System.getenv("WINDIR"), commandExecutor);
+                    instance = new WindowsStorageDeviceDetector(commandExecutor, Kernel32.INSTANCE);
                     break;
 
                 case LINUX:
