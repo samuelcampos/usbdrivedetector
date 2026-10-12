@@ -23,17 +23,7 @@ import java.io.IOException;
  *
  * @author samuelcampos
  */
-@Slf4j
-public class CommandExecutor {
+public interface CommandExecutor {
 
-    public OutputProcessor executeCommand(final String command) throws IOException {
-        if (log.isTraceEnabled()) {
-            log.trace("Running command: {}", command);
-        }
-
-        Process process = Runtime.getRuntime().exec(command);
-
-        return new CommandOutputProcessor(command, process);
-    }
-
+    OutputProcessor executeCommand(final String command) throws IOException;
 }

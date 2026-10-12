@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -55,5 +57,17 @@ public abstract class OutputProcessor implements Closeable {
                 log.error(e.getMessage(), e);
             }
         }
+    }
+
+    public static OutputProcessor createFrom(String output) {
+        Reader stringReader = new StringReader(output);
+        BufferedReader bufferedReader = new BufferedReader(stringReader);
+        return new OutputProcessor(bufferedReader) {
+
+            @Override
+            public void close() throws IOException {
+                bufferedReader.close();
+            }
+        };
     }
 }

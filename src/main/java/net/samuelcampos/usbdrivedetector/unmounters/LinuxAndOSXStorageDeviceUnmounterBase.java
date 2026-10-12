@@ -4,10 +4,11 @@ import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import net.samuelcampos.usbdrivedetector.process.CommandExecutor;
 import net.samuelcampos.usbdrivedetector.process.OutputProcessor;
+import net.samuelcampos.usbdrivedetector.process.ProcessCommandExecutor;
 
 @Slf4j
 public abstract class LinuxAndOSXStorageDeviceUnmounterBase extends AbstractStorageDeviceUnmounter {
-    private final CommandExecutor commandExecutor = new CommandExecutor();
+    private final CommandExecutor commandExecutor = new ProcessCommandExecutor();
 
     protected void unmount(String unmoundCommand) {
         try (final OutputProcessor commandOutputProcessor = commandExecutor.executeCommand(unmoundCommand)) {
