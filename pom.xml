@@ -21,6 +21,7 @@
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
 
         <powershell-lib-java.version>2.0.0</powershell-lib-java.version>
+        <jna.version>5.14.0</jna.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -44,6 +45,18 @@
             <groupId>com.github.tuupertunut</groupId>
             <artifactId>powershell-lib-java</artifactId>
             <version>${powershell-lib-java.version}</version>
+        </dependency>
+
+        <!-- JNA for native Windows API calls -->
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>${jna.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna-platform</artifactId>
+            <version>${jna.version}</version>
         </dependency>
 
         <dependency>

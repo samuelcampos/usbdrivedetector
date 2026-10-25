@@ -265,7 +265,9 @@ public class USBDeviceDetectorManager implements Closeable {
                 List<USBStorageDevice> actualConnectedDevices = getRemovableDevices();
 
                 updateConnectedDevices(actualConnectedDevices);
-            } catch (Exception e) {
+            } catch (Exception | LinkageError e) {
+                // An uncaught throwable cancels all future runs of this scheduled task. LinkageError covers native
+                // libraries (e.g. JNA on Windows) failing to load.
                 log.error("Error while refreshing device list", e);
             }
         }
